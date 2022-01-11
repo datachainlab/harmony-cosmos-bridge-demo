@@ -45,7 +45,7 @@ jobs:
           key: ${{ runner.os }}-deploy-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-deploy-${{ env.cache-name }}-
-      - run: npm ci
+      - run: npm install
         working-directory: ./contract
       - name: Setup Harmony Debug Env
         run: |
