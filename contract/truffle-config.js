@@ -1,12 +1,12 @@
 const { TruffleProvider } = require('@harmony-js/core')
 //Local
-const local_private_key = process.env.LOCAL_PRIVATE_KEY
-const local_0_url = process.env.LOCAL_SHARD_0_URL
-const local_1_url = process.env.LOCAL_SHARD_1_URL
+const local_private_key = process.env.HARMONY_LOCAL_PRIVATE_KEY
+const local_0_url = process.env.HARMONY_LOCAL_SHARD_0_URL
+const local_1_url = process.env.HARMONY_LOCAL_SHARD_1_URL
 
 //GAS - Currently using same GAS accross all environments
-gasLimit = process.env.GAS_LIMIT
-gasPrice = process.env.GAS_PRICE
+const gasLimit = process.env.HARMONY_GAS_LIMIT
+const gasPrice = process.env.HARMONY_GAS_PRICE
 
 module.exports = {
   // TODO

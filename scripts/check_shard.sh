@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-expected_shard0_url=${LOCAL_SHARD_0_URL}
-expected_shard1_url=${LOCAL_SHARD_1_URL}
+expected_shard0_url=${HARMONY_LOCAL_SHARD_0_URL}
+expected_shard1_url=${HARMONY_LOCAL_SHARD_1_URL}
 max_shard=1
 
 function check() {
