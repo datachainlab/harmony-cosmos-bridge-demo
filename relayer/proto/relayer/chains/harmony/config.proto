@@ -1,0 +1,24 @@
+syntax = "proto3";
+package relayer.chains.harmony.config;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/datachainlab/harmony-cosmos-bridge-demo/relayer/chains/harmony";
+option (gogoproto.goproto_getters_all) = false;
+
+message ChainConfig {
+  string chain_id = 1;
+  // human name of a chain-id
+  string harmony_chain_id = 2;
+  uint32 shard_id = 3;
+  string rpc_addr = 4;
+
+  // use for relayer
+  string private_key = 5;
+
+  string ibc_host_address = 6;
+  string ibc_handler_address = 7;
+
+  uint64 gas_limit = 8;
+  int64 gas_price = 9;
+}

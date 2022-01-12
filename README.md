@@ -26,7 +26,9 @@ make setup-harmony
 
 ## Relayer
 
-TODO
+```
+make build-relayer
+```
 
 ## Harmony Localnet
 
@@ -35,9 +37,16 @@ Compile and deploy contracts:
 ```
 make compile-contracts
 make debug-harmony &
-make deploy-contracts-shard0 # or make deploy-contracts-shard1
+make deploy-contracts-shard1
 ```
 
 # E2E
 
-TODO
+Currently up to IBC Handshake with mock client.
+
+```
+cd tests/cases/tm2harmony
+make network
+make test
+make network-down
+```

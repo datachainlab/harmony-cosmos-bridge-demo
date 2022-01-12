@@ -1,0 +1,26 @@
+version: '3.5'
+
+networks:
+  relayer-e2e:
+    name: &network-common relayer-e2e
+
+services:
+# Tendermint
+  tendermint-chain:
+    container_name: tendermint-chain
+    image: tendermint-chain:${TAG}
+    ports:
+      - 26656:26656
+      - 26657:26657
+      - 6060:6060
+      - 9090:9090
+    healthcheck:
+      test: "wget -q -O - http://localhost:26657/health || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - *network-common
+  # TODO Harmony (shard0/1)
+  #harmony-shard0:
+  #harmony-shard1:

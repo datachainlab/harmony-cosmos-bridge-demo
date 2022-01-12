@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
-    "@hyperledger-labs/yui-ibc-solidity": "hyperledger-labs/yui-ibc-solidity.git#b1c507b339f0df551280fc78d15b6ad084c00f59",
+    "@hyperledger-labs/yui-ibc-solidity": "hyperledger-labs/yui-ibc-solidity#b1c507b339f0df551280fc78d15b6ad084c00f59",
     "openzeppelin-solidity": "^4.3.2",
-    "truffle": "^5.3.14",
+    "truffle": "5.1.58",
     "truffle-contract-size": "^2.0.1",
     "@harmony-js/core": "^0.1.57",
     "tslib": "^1.11.1"
