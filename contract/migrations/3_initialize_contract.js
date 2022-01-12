@@ -19,9 +19,9 @@ module.exports = async function (deployer) {
     () => ibcHandler.registerClient(MockClientType, MockClient.address),
     () => ics20Bank.setOperator(ICS20TransferBank.address),
   ]) {
-    const result = await f();
+    const result = await f().catch((err) => { throw err });
+    console.log(result);
     if(!result.receipt.status) {
-      console.log(result);
       throw new Error(`transaction failed to execute. ${result.tx}`);
     }
   }
