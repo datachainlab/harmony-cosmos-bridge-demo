@@ -287,7 +287,6 @@ func (c *Chain) txIbcHandler(method string, params ...interface{}) (*harmonytype
 		return nil, err
 	}
 	controller := transaction.NewController(c.client.messenger, c.keyStore, &account, *c.chainId)
-	// XXX or GetNextNonce
 	nonce := transaction.GetNextPendingNonce(account.Address.Hex(), c.client.messenger)
 	err = controller.ExecuteTransaction(nonce, c.config.GasLimit, &c.config.IbcHandlerAddress, c.config.ShardId, c.config.ShardId, numeric.NewDec(0), c.config.GasPriceDec(), input)
 	if err != nil {

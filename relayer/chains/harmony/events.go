@@ -2,6 +2,7 @@ package harmony
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"strings"
@@ -11,6 +12,8 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	v1 "github.com/harmony-one/go-sdk/pkg/rpc/v1"
 
 	"github.com/hyperledger-labs/yui-ibc-solidity/pkg/contract/ibchandler"
 	"github.com/hyperledger-labs/yui-ibc-solidity/pkg/contract/ibchost"
@@ -55,13 +58,12 @@ func (chain *Chain) findPacket(
 			abiSendPacket.ID,
 		}},
 	}
-	logs, err := chain.queryClient.FilterLogs(ctx, query)
+	logsData, err := chain.findLogsData(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-
-	for _, log := range logs {
-		if values, err := abiSendPacket.Inputs.Unpack(log.Data); err != nil {
+	for _, data := range logsData {
+		if values, err := abiSendPacket.Inputs.Unpack(data); err != nil {
 			return nil, err
 		} else {
 			p := values[0].(struct {
@@ -112,13 +114,13 @@ func (chain *Chain) getAllPackets(
 			abiSendPacket.ID,
 		}},
 	}
-	logs, err := chain.queryClient.FilterLogs(ctx, query)
+	logsData, err := chain.findLogsData(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, log := range logs {
-		if values, err := abiSendPacket.Inputs.Unpack(log.Data); err != nil {
+	for _, data := range logsData {
+		if values, err := abiSendPacket.Inputs.Unpack(data); err != nil {
 			return nil, err
 		} else {
 			p := values[0].(struct {
@@ -167,13 +169,13 @@ func (chain *Chain) findAcknowledgement(
 			abiWriteAcknowledgement.ID,
 		}},
 	}
-	logs, err := chain.queryClient.FilterLogs(ctx, query)
+	logsData, err := chain.findLogsData(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, log := range logs {
-		if values, err := abiWriteAcknowledgement.Inputs.Unpack(log.Data); err != nil {
+	for _, data := range logsData {
+		if values, err := abiWriteAcknowledgement.Inputs.Unpack(data); err != nil {
 			return nil, err
 		} else {
 			if len(values) != 4 {
@@ -208,12 +210,12 @@ func (chain *Chain) getAllAcknowledgements(
 			abiWriteAcknowledgement.ID,
 		}},
 	}
-	logs, err := chain.queryClient.FilterLogs(ctx, query)
+	logsData, err := chain.findLogsData(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	for _, log := range logs {
-		if values, err := abiWriteAcknowledgement.Inputs.Unpack(log.Data); err != nil {
+	for _, data := range logsData {
+		if values, err := abiWriteAcknowledgement.Inputs.Unpack(data); err != nil {
 			return nil, err
 		} else {
 			if len(values) != 4 {
@@ -228,4 +230,42 @@ func (chain *Chain) getAllAcknowledgements(
 		}
 	}
 	return acks, nil
+}
+
+func (chain *Chain) findLogsData(ctx context.Context, q ethereum.FilterQuery) ([][]byte, error) {
+	arg, err := toFilterArg(q)
+	if err != nil {
+		return nil, err
+	}
+	rep, err := chain.client.messenger.SendRPC(v1.Method.GetPastLogs, []interface{}{arg})
+	if err != nil {
+		return nil, err
+	}
+	result, ok := rep["result"]
+	if !ok {
+		return nil, errors.New("invalid request")
+	}
+
+	rs, ok := result.([]interface{})
+	if !ok {
+		return nil, errors.New("can't convert result to slice")
+	}
+	// need all data?
+	data := make([][]byte, len(rs))
+	for i, r := range rs {
+		resmap, ok := r.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("can't convert to map")
+		}
+		dataStr, ok := resmap["data"].(string)
+		if !ok {
+			return nil, errors.New("can't convert data")
+		}
+		bz, err := hexutil.Decode(dataStr)
+		if err != nil {
+			return nil, err
+		}
+		data[i] = bz
+	}
+	return data, nil
 }
