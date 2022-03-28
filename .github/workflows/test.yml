@@ -1,0 +1,136 @@
+name: Test
+on: [push, pull_request]
+
+env:
+  CACHE_BIN_RELAYER_KEY: bin-relayer
+  CACHE_BIN_RELAYER_PATH: ./build/uly
+  CACHE_DOCKER_TENDERMINT_KEY: docker-tendermint
+  CACHE_DOCKER_TENDERMINT_DIR: /tmp/tendermint
+  CACHE_DOCKER_HARMONY_KEY: docker-harmony
+  CACHE_DOCKER_HARMONY_DIR: /tmp/harmony
+
+jobs:
+  relayer-build:
+    name: relayer-build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Setup Harmony Lib
+        run: |
+          make setup-harmony
+      - name: Run Unit test
+        run: make test
+      - name: Build
+        run: make build
+      - name: Save relayer binary cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CACHE_BIN_RELAYER_PATH }}
+          key: ${{ runner.os }}-${{ env.CACHE_BIN_RELAYER_KEY }}-${{ github.sha }}
+
+  tendermint-build:
+    name: tendermint-build
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        id: cache-docker-tendermint
+        with:
+          path: ${{ env.CACHE_DOCKER_TENDERMINT_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_TENDERMINT_KEY }}-${{ hashFiles('tests/chains/tendermint/**', '!**/.git/**') }}
+      - name: Build docker images
+        if: steps.cache-docker-tendermint.outputs.cache-hit != 'true'
+        working-directory: ./tests/chains/tendermint
+        run: |
+          make docker-image
+      - name: Save docker images
+        if: steps.cache-docker-tendermint.outputs.cache-hit != 'true'
+        working-directory: ./tests/scripts
+        run: |
+          ./save_docker_images $CACHE_DOCKER_TENDERMINT_DIR tendermint-chain:latest
+
+  harmony-build:
+    name: harmony-build
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      # TODO use npm v16
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - uses: actions/cache@v2
+        id: cache-docker-harmony
+        with:
+          path: ${{ env.CACHE_DOCKER_ETHEREUM_GANACHE_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_ETHEREUM_GANACHE_KEY }}-${{ hashFiles('tests/chains/harmony/**', '!**/.git/**') }}
+      - uses: actions/cache@v2
+        id: cache-harmony-contract
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        with:
+          path: contract/node_modules
+          key: ${{ runner.os }}-harmony-contract-${{ hashFiles('contract/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-harmony-contract-
+      # TODO deploy contract
+      - name: Install node_modules
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        working-directory: ./contract
+        run: |
+          npm ci
+      - name: Build docker images
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        working-directory: ./tests/chains/harmony
+        run: |
+          make docker-image
+      - name: Save docker images
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        working-directory: ./tests/scripts
+        run: |
+          ./save_docker_images $CACHE_DOCKER_HARMONY_DIR harmony-chain:latest
+
+  tm2harmony-test:
+    name: tm2harmony-test
+    runs-on: ubuntu-20.04
+    needs:
+      - relayer-build
+      - tendermint-build
+      - harmony-build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore relayer binary cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CACHE_BIN_RELAYER_PATH }}
+          key: ${{ runner.os }}-${{ env.CACHE_BIN_RELAYER_KEY }}-${{ github.sha }}
+      - name: Restore Tendermint docker image cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CACHE_DOCKER_TENDERMINT_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_TENDERMINT_KEY }}-${{ hashFiles('tests/chains/tendermint/**', '!**/.git/**') }}
+      - name: Load Tendermint docker image
+        working-directory: ./tests/scripts
+        run: |
+          ./load_docker_images $CACHE_DOCKER_TENDERMINT_DIR tendermint-chain0:latest
+      - name: Run Test
+        working-directory: ./tests/cases/tm2harmony
+        run: |
+          make network
+          make test
+          make network-down
+
+  # TODO
+  #harmony2tm-test:
