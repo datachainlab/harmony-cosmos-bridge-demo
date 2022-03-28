@@ -4,8 +4,8 @@ include ../../docker.mk
 build:
 	go build -o ./build/simd ./simapp/simd
 
-.PHONY: docker-images
-docker-images:
+.PHONY: docker-image
+docker-image:
 	$(DOCKER_BUILD) \
 		--build-arg CHAINID=ibc0 \
 		--tag $(DOCKER_REPO)tendermint-chain:$(DOCKER_TAG) .

@@ -1,13 +1,34 @@
 include ../../docker.mk
 
+RETRY ?= 5
+
 .PHONY: network
 network:
 	TAG=${DOCKER_TAG} $(DOCKER_COMPOSE) \
 		-f ../docker-compose-test.yaml \
 		up -d \
 		tendermint-chain
-#		harmony-shard0
-#	make wait-for-launch ATTEMPT=30 CONTAINER=harmony-shard0-1
+
+	@for i in $(shell seq ${RETRY}); do \
+		make network-harmony & \
+		../../scripts/check_shard.sh && break ; \
+		make network-harmony-down ; \
+	done
+	make wait-for-launch ATTEMPT=30 CONTAINER=harmony-chain
+
+.PHONY: network-harmony
+network-harmony:
+	@TAG=${DOCKER_TAG} $(DOCKER_COMPOSE) \
+		-f ../docker-compose-test.yaml \
+		up -d \
+		harmony-chain
+
+.PHONY: network-harmony-down
+network-harmony-down:
+	@TAG=${DOCKER_TAG} $(DOCKER_COMPOSE) \
+		-f ../docker-compose-test.yaml \
+		rm -fsv \
+		harmony-chain
 
 .PHONY: test
 test:

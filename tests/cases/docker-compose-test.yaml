@@ -21,6 +21,25 @@ services:
       retries: 5
     networks:
       - *network-common
-  # TODO Harmony (shard0/1)
-  #harmony-shard0:
-  #harmony-shard1:
+# Harmony
+  harmony-chain:
+    container_name: harmony-chain
+    image: harmony-chain:${TAG}
+    environment:
+      API_ENDPOINT: http://localhost:9598
+    ports:
+      - 9500:9500
+      - 9501:9501
+      - 9596:9596
+      - 9598:9598
+      - 9800:9800
+      - 9801:9801
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9598"]
+      start_period: 10s
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - *network-common
+

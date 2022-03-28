@@ -6,8 +6,8 @@ harmony-cosmos-bridge-demo
 ## Env
 
 ```
-export HARMONY_LOCAL_SHARD_0_URL=http://localhost:9599
-export HARMONY_LOCAL_SHARD_1_URL=http://localhost:9598
+export HARMONY_LOCAL_SHARD_0_URL=http://localhost:9598
+export HARMONY_LOCAL_SHARD_1_URL=http://localhost:9596
 export HARMONY_GAS_LIMIT=100000000
 export HARMONY_GAS_PRICE=1000000000
 # cf. https://github.com/harmony-one/harmony/pull/3332
