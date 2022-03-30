@@ -3,7 +3,6 @@ BLS_GIT_OPTS?=-b v0.0.6
 MCL_GIT_OPTS?=
 GIT_OPTS?=--depth 1
 DEBUG_RETRY?=3
-ABIGEN?=abigen
 
 gopath=$(shell go env GOPATH)
 harmony_root=${gopath}/src/github.com/harmony-one
