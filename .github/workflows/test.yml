@@ -32,10 +32,8 @@ jobs:
       - name: Setup Harmony Lib
         run: |
           make setup-harmony
-      - name: Run Unit test
-        run: make test
       - name: Build
-        run: make build
+        run: make build-relayer
       - name: Save relayer binary cache
         uses: actions/cache@v2
         with:
@@ -68,10 +66,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      # TODO use npm v16
       - uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '14'
       - uses: actions/cache@v2
         id: cache-docker-harmony
         with:

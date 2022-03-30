@@ -51,3 +51,7 @@ deploy-contracts-shard0:
 
 deploy-contracts-shard1:
 	make -C contract deploy-shard1
+
+.PHONY: build-relayer
+build-relayer:
+	make -C relayer build
