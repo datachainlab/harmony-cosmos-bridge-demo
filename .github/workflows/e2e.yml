@@ -1,4 +1,4 @@
-name: Test
+name: E2E Test
 on: [push, pull_request]
 
 env:
@@ -66,28 +66,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
       - uses: actions/cache@v2
         id: cache-docker-harmony
         with:
-          path: ${{ env.CACHE_DOCKER_ETHEREUM_GANACHE_DIR }}
-          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_ETHEREUM_GANACHE_KEY }}-${{ hashFiles('tests/chains/harmony/**', '!**/.git/**') }}
-      - uses: actions/cache@v2
-        id: cache-harmony-contract
-        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
-        with:
-          path: contract/node_modules
-          key: ${{ runner.os }}-harmony-contract-${{ hashFiles('contract/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-harmony-contract-
-      # TODO deploy contract
-      - name: Install node_modules
-        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
-        working-directory: ./contract
-        run: |
-          npm ci
+          path: ${{ env.CACHE_DOCKER_HARMONY_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_HARMONY_KEY }}-${{ hashFiles('tests/chains/harmony/**', '!**/.git/**') }}
+      # TODO build image with deployed contracts
       - name: Build docker images
         if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
         working-directory: ./tests/chains/harmony
@@ -102,12 +86,23 @@ jobs:
   tm2harmony-test:
     name: tm2harmony-test
     runs-on: ubuntu-20.04
+    env:
+      HARMONY_GAS_LIMIT: 100000000
+      HARMONY_GAS_PRICE: 1000000000
+      # cf. https://github.com/harmony-one/harmony/pull/3332
+      HARMONY_LOCAL_PRIVATE_KEY: '0x1f84c95ac16e6a50f08d44c7bde7aff8742212fda6e4321fde48bf83bef266dc'
+      # for debug env (not same as harmony-test)
+      HARMONY_LOCAL_SHARD_0_URL: http://localhost:9598
+      HARMONY_LOCAL_SHARD_1_URL: http://localhost:9596
     needs:
       - relayer-build
       - tendermint-build
       - harmony-build
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
       - name: Restore relayer binary cache
         uses: actions/cache@v2
         with:
@@ -118,15 +113,46 @@ jobs:
         with:
           path: ${{ env.CACHE_DOCKER_TENDERMINT_DIR }}
           key: ${{ runner.os }}-${{ env.CACHE_DOCKER_TENDERMINT_KEY }}-${{ hashFiles('tests/chains/tendermint/**', '!**/.git/**') }}
+      - uses: actions/cache@v2
+        id: cache-harmony-contract
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        with:
+          path: contract/node_modules
+          key: ${{ runner.os }}-harmony-contract-${{ hashFiles('contract/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-harmony-contract-
+      - name: Install node_modules
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        working-directory: ./contract
+        run: |
+          npm install
       - name: Load Tendermint docker image
         working-directory: ./tests/scripts
         run: |
-          ./load_docker_images $CACHE_DOCKER_TENDERMINT_DIR tendermint-chain0:latest
-      - name: Run Test
+          ./load_docker_images $CACHE_DOCKER_TENDERMINT_DIR tendermint-chain:latest
+      - name: Restore Harmony docker image cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CACHE_DOCKER_HARMONY_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_HARMONY_KEY }}-${{ hashFiles('tests/chains/harmony/**', '!**/.git/**') }}
+      - name: Load Harmony docker image
+        working-directory: ./tests/scripts
+        run: |
+          ./load_docker_images $CACHE_DOCKER_HARMONY_DIR harmony-chain:latest
+      - name: Run Network
         working-directory: ./tests/cases/tm2harmony
         run: |
           make network
-          make test
+      - name: Deploy Contracts to Harmony Shard 0
+        run: |
+          make deploy-contracts-shard0
+      # TODO
+      #- name: Test
+      #  run: |
+      #    make test
+      - name: Stop Network
+        working-directory: ./tests/cases/tm2harmony
+        run: |
           make network-down
 
   # TODO

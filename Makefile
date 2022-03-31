@@ -33,7 +33,7 @@ debug-harmony:
 debug-harmony-retry:
 	@for i in $(shell seq ${DEBUG_RETRY}); do \
 		make debug-harmony & \
-		./scripts/check_shard.sh && break ; \
+		./tests/scripts/check_shard.sh && break ; \
 		make debug-harmony-down ; \
 	done
 
