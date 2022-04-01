@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 env:
   CACHE_BIN_RELAYER_KEY: bin-relayer
-  CACHE_BIN_RELAYER_PATH: ./build/uly
+  CACHE_BIN_RELAYER_DIR: ./relayer/build
   CACHE_DOCKER_TENDERMINT_KEY: docker-tendermint
   CACHE_DOCKER_TENDERMINT_DIR: /tmp/tendermint
   CACHE_DOCKER_HARMONY_KEY: docker-harmony
@@ -29,15 +29,16 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Setup Harmony Lib
-        run: |
-          make clone-harmony && make build-harmony
+      - name: Build harmony libs
+        if: steps.cache-harmony-libs.outputs.cache-hit != 'true'
+        run: make -C relayer harmony-libs
       - name: Build
-        run: make build-relayer
+        run: make -C relayer build
       - name: Save relayer binary cache
         uses: actions/cache@v2
+        id: cache-harmony-libs
         with:
-          path: ${{ env.CACHE_BIN_RELAYER_PATH }}
+          path: ${{ env.CACHE_BIN_RELAYER_DIR }}
           key: ${{ runner.os }}-${{ env.CACHE_BIN_RELAYER_KEY }}-${{ github.sha }}
 
   tendermint-build:
@@ -94,6 +95,7 @@ jobs:
       # for debug env (not same as harmony-test)
       HARMONY_LOCAL_SHARD_0_URL: http://localhost:9598
       HARMONY_LOCAL_SHARD_1_URL: http://localhost:9596
+      LD_LIBRARY_PATH: relayer/build
     needs:
       - relayer-build
       - tendermint-build
@@ -106,7 +108,7 @@ jobs:
       - name: Restore relayer binary cache
         uses: actions/cache@v2
         with:
-          path: ${{ env.CACHE_BIN_RELAYER_PATH }}
+          path: ${{ env.CACHE_BIN_RELAYER_DIR }}
           key: ${{ runner.os }}-${{ env.CACHE_BIN_RELAYER_KEY }}-${{ github.sha }}
       - name: Restore Tendermint docker image cache
         uses: actions/cache@v2
@@ -146,10 +148,12 @@ jobs:
       - name: Deploy Contracts to Harmony Shard 0
         run: |
           make deploy-contracts-shard0
-      # TODO
-      #- name: Test
-      #  run: |
-      #    make test
+      - name: Test
+        working-directory: ./tests/cases/tm2harmony
+        run: |
+          echo $LD_LIBRARY_PATH
+          ls $LD_LIBRARY_PATH
+          make test
       - name: Stop Network
         working-directory: ./tests/cases/tm2harmony
         run: |
