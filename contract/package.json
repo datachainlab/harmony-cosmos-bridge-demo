@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "engines": {
-    "node": "14.x"
+    "node": "16.x"
   },
   "dependencies": {
     "@hyperledger-labs/yui-ibc-solidity": "hyperledger-labs/yui-ibc-solidity#1449d800e41331d8994a33aacd026aa7b7b9176b",
-    "@datachainlab/tendermint-sol": "datachainlab/tendermint-sol#80a6177bc63f01ace3212f4a8234f90b0fa54b3a",
-    "openzeppelin-solidity": "^4.3.2"
+    "@datachainlab/tendermint-sol": "datachainlab/tendermint-sol#5e2263d0856270ce8140a9fd05f52fefffea4e3a"
   },
   "devDependencies": {
     "truffle": "^5.4.3",
