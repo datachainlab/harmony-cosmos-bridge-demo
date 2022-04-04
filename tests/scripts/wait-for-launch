@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $(cd $(dirname "$0"); pwd)/util
+source $(cd $(dirname ${BASH_SOURCE:-$0}); pwd)/util
 
 MAX_ATTEMPTS=$1
 CONTAINER=$2

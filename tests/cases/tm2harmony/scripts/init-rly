@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -eux
 
-SCRIPT_DIR=$(cd $(dirname $0); pwd)
+SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
 
-## load harmony env
-#. ${SCRIPT_DIR}/env
+## load harmony lib env
+. ${SCRIPT_DIR}/env
 
 RELAYER_CONF="$HOME/.urelayer"
 RLY_BINARY=${SCRIPT_DIR}/../../../../relayer/build/uly

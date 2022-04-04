@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$(cd $(dirname $0); pwd)
-. ${SCRIPT_DIR}/../../../../relayer/scripts/setup_bls_build_flags.sh
+SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
+export LD_LIBRARY_PATH=${SCRIPT_DIR}/../../../../relayer/build
+
+OS=$(uname -s)
+case $OS in
+   Darwin)
+      export DYLD_FALLBACK_LIBRARY_PATH=$LD_LIBRARY_PATH
+      ;;
+esac

@@ -157,7 +157,6 @@ jobs:
       - name: Test
         working-directory: ./tests/cases/tm2harmony
         run: |
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GITHUB_WORKSPACE}/relayer/build" >> $GITHUB_ENV
           make test
       - name: Stop Network
         working-directory: ./tests/cases/tm2harmony

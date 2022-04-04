@@ -1,6 +1,5 @@
 include ../../docker.mk
 
-
 .PHONY: network
 network:
 	make network-tendermint
@@ -28,11 +27,12 @@ network-harmony-down:
 		rm -fsv \
 		harmony-chain
 
+# TODO
 .PHONY: test
 test:
 	./scripts/fixture
 	./scripts/init-rly
-	./scripts/handshake
+	#./scripts/handshake
 	#./scripts/test-tx
 
 .PHONY: network-down
