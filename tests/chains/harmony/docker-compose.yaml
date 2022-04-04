@@ -1,0 +1,26 @@
+version: '3.5'
+networks:
+  harmony-scaffold:
+    name: &network-common harmony-scaffold
+
+services:
+  harmony-scaffold:
+    container_name: harmony-scaffold
+    build:
+      context: ./docker
+      args:
+        - HARMONY_TAG=v4.3.1
+        - BLS_TAG=v0.0.6
+    environment:
+      API_ENDPOINT: http://localhost:9598
+    ports:
+      - 9596:9596
+      - 9598:9598
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9598"]
+      start_period: 10s
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - *network-common
