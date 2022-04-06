@@ -2,18 +2,24 @@
   "name": "harmony-cosmos-bridge-demo",
   "version": "1.0.0",
   "description": "",
+  "engines": {
+    "node": "16.x"
+  },
   "dependencies": {
-    "@hyperledger-labs/yui-ibc-solidity": "hyperledger-labs/yui-ibc-solidity#b1c507b339f0df551280fc78d15b6ad084c00f59",
-    "openzeppelin-solidity": "^4.3.2",
-    "truffle": "5.1.58",
+    "@hyperledger-labs/yui-ibc-solidity": "hyperledger-labs/yui-ibc-solidity#1449d800e41331d8994a33aacd026aa7b7b9176b",
+    "@datachainlab/tendermint-sol": "datachainlab/tendermint-sol#5e2263d0856270ce8140a9fd05f52fefffea4e3a"
+  },
+  "devDependencies": {
+    "truffle": "^5.4.3",
     "truffle-contract-size": "^2.0.1",
     "@harmony-js/core": "^0.1.57",
     "tslib": "^1.11.1"
   },
   "scripts": {
     "compile": "truffle compile",
-    "migrate-local-shard0": "truffle migrate --reset --skip-dry-run --compile-none --network local_shard_0",
-    "migrate-local-shard1": "truffle migrate --reset --skip-dry-run --compile-none --network local_shard_1",
+    "migrate": "npm run migrate-local-shard0 && npm run migrate-local-shard1",
+    "migrate-local-shard0": "truffle migrate --reset --skip-dry-run --network local_shard_0",
+    "migrate-local-shard1": "truffle migrate --reset --skip-dry-run --network local_shard_1",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

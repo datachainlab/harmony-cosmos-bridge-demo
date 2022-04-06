@@ -2,7 +2,7 @@
 
 set -eox pipefail
 
-source $(cd $(dirname "$0"); pwd)/util
+source $(cd $(dirname ${BASH_SOURCE:-$0}); pwd)/util
 
 LOAD_DIR=$1
 if [ ! -d $LOAD_DIR ];then

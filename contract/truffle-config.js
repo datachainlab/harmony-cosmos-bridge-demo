@@ -9,11 +9,6 @@ const gasLimit = process.env.HARMONY_GAS_LIMIT
 const gasPrice = process.env.HARMONY_GAS_PRICE
 
 module.exports = {
-  // TODO
-  // When adding some contracts for harmony,
-  // we need to remove this setting and compile the dependent contracts we want to migrate instead.
-  contracts_directory: "./node_modules/@hyperledger-labs/yui-ibc-solidity/contracts",
-
   networks: {
     local_shard_0: {
       network_id: '2',

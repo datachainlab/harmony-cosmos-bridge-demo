@@ -1,11 +1,14 @@
-const IBCHost = artifacts.require("IBCHost");
-const IBCHandler = artifacts.require("IBCHandler");
-const MockClient = artifacts.require("MockClient");
-const ICS20TransferBank = artifacts.require("ICS20TransferBank");
-const ICS20Bank = artifacts.require("ICS20Bank");
+const IBCHost = artifacts.require("@hyperledger-labs/yui-ibc-solidity/IBCHost");
+const IBCHandler = artifacts.require("@hyperledger-labs/yui-ibc-solidity/IBCHandler");
+// TODO remove after TendermintLightClient works
+const MockClient = artifacts.require("@hyperledger-labs/yui-ibc-solidity/MockClient");
+const TendermintLightClient = artifacts.require("@datachainlab/tendermint-sol/TendermintLightClient");
+const ICS20TransferBank = artifacts.require("@hyperledger-labs/yui-ibc-solidity/ICS20TransferBank");
+const ICS20Bank = artifacts.require("@hyperledger-labs/yui-ibc-solidity/ICS20Bank");
 
 const PortTransfer = "transfer"
 const MockClientType = "mock-client"
+const TendermintLightClientType = "07-tendermint"
 
 module.exports = async function (deployer) {
   const ibcHost = await IBCHost.deployed();
@@ -15,8 +18,9 @@ module.exports = async function (deployer) {
   for(const f of [
     () => ibcHost.setIBCModule(IBCHandler.address),
     () => ibcHandler.bindPort(PortTransfer, ICS20TransferBank.address),
-    // TODO replace with Tendermint Client
+    // TODO remove after TendermintLightClient works
     () => ibcHandler.registerClient(MockClientType, MockClient.address),
+    () => ibcHandler.registerClient(TendermintLightClientType, TendermintLightClient.address),
     () => ics20Bank.setOperator(ICS20TransferBank.address),
   ]) {
     const result = await f().catch((err) => { throw err });

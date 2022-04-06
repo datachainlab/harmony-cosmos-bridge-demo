@@ -1,0 +1,171 @@
+name: E2E Test
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  CACHE_BIN_RELAYER_KEY: bin-relayer
+  CACHE_BIN_RELAYER_DIR: relayer/build
+  CACHE_DOCKER_TENDERMINT_KEY: docker-tendermint
+  CACHE_DOCKER_TENDERMINT_DIR: /tmp/tendermint
+  CACHE_DOCKER_HARMONY_KEY: docker-harmony
+  CACHE_DOCKER_HARMONY_DIR: /tmp/harmony
+  CACHE_DOCKER_HARMONY_SCAFFOLD_KEY: docker-harmony-scaffold
+  CACHE_DOCKER_HARMONY_SCAFFOLD_DIR: /tmp/harmony-scaffold
+
+jobs:
+  relayer-build:
+    name: relayer-build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build harmony libs
+        if: steps.cache-harmony-libs.outputs.cache-hit != 'true'
+        run: make -C relayer harmony-libs
+      - name: Build
+        run: make -C relayer build
+      - name: Save relayer binary cache
+        uses: actions/cache@v2
+        id: cache-harmony-libs
+        with:
+          path: ${{ env.CACHE_BIN_RELAYER_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_BIN_RELAYER_KEY }}-${{ github.sha }}
+
+  tendermint-build:
+    name: tendermint-build
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        id: cache-docker-tendermint
+        with:
+          path: ${{ env.CACHE_DOCKER_TENDERMINT_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_TENDERMINT_KEY }}-${{ hashFiles('tests/chains/tendermint/**', '!**/.git/**') }}
+      - name: Build docker images
+        if: steps.cache-docker-tendermint.outputs.cache-hit != 'true'
+        working-directory: ./tests/chains/tendermint
+        run: |
+          make docker-image
+      - name: Save docker images
+        if: steps.cache-docker-tendermint.outputs.cache-hit != 'true'
+        working-directory: ./tests/scripts
+        run: |
+          ./save_docker_images $CACHE_DOCKER_TENDERMINT_DIR tendermint-chain:latest
+
+  harmony-build:
+    name: harmony-build
+    runs-on: ubuntu-20.04
+    env:
+      HARMONY_GAS_LIMIT: 100000000
+      HARMONY_GAS_PRICE: 1000000000
+      # cf. https://github.com/harmony-one/harmony/pull/3332
+      HARMONY_LOCAL_PRIVATE_KEY: '0x1f84c95ac16e6a50f08d44c7bde7aff8742212fda6e4321fde48bf83bef266dc'
+      # for debug env (not same as harmony-test)
+      HARMONY_LOCAL_SHARD_0_URL: http://localhost:9598
+      HARMONY_LOCAL_SHARD_1_URL: http://localhost:9596
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - uses: actions/cache@v2
+        id: cache-docker-harmony-scaffold
+        with:
+          path: ${{ env.CACHE_DOCKER_HARMONY_SCAFFOLD_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_HARMONY_SCAFFOLD_KEY }}-${{ hashFiles('tests/chains/harmony/**', '!**/.git/**') }}
+      - uses: actions/cache@v2
+        id: cache-docker-harmony
+        with:
+          path: ${{ env.CACHE_DOCKER_HARMONY_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_HARMONY_KEY }}-${{ hashFiles('tests/chains/harmony/**', 'contract/**', '!**/.git/**') }}
+      - uses: actions/cache@v2
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-harmony-contract-${{ hashFiles('contract/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-harmony-contract-
+      - name: Install node_modules
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        working-directory: ./contract
+        run: |
+          npm ci
+      - name: Build docker images
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        working-directory: ./tests/chains/harmony
+        run: |
+          make docker-image
+      - name: Save docker images
+        if: steps.cache-docker-harmony.outputs.cache-hit != 'true'
+        working-directory: ./tests/scripts
+        run: |
+          ./save_docker_images $CACHE_DOCKER_HARMONY_DIR harmony-chain:latest
+      - name: Save scaffold docker images
+        if: steps.cache-docker-harmony-scaffold.outputs.cache-hit != 'true'
+        working-directory: ./tests/scripts
+        run: |
+          ./save_docker_images $CACHE_DOCKER_HARMONY_SCAFFOLD_DIR harmony_harmony-scaffold:latest
+
+  tm2harmony-test:
+    name: tm2harmony-test
+    runs-on: ubuntu-20.04
+    needs:
+      - relayer-build
+      - tendermint-build
+      - harmony-build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore relayer binary cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CACHE_BIN_RELAYER_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_BIN_RELAYER_KEY }}-${{ github.sha }}
+      - name: Restore Tendermint docker image cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CACHE_DOCKER_TENDERMINT_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_TENDERMINT_KEY }}-${{ hashFiles('tests/chains/tendermint/**', '!**/.git/**') }}
+      - name: Load Tendermint docker image
+        working-directory: ./tests/scripts
+        run: |
+          ./load_docker_images $CACHE_DOCKER_TENDERMINT_DIR tendermint-chain:latest
+      - name: Restore Harmony docker image cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CACHE_DOCKER_HARMONY_DIR }}
+          key: ${{ runner.os }}-${{ env.CACHE_DOCKER_HARMONY_KEY }}-${{ hashFiles('tests/chains/harmony/**', 'contract/**', '!**/.git/**') }}
+      - name: Load Harmony docker image
+        working-directory: ./tests/scripts
+        run: |
+          ./load_docker_images $CACHE_DOCKER_HARMONY_DIR harmony-chain:latest
+      - name: Run Network
+        working-directory: ./tests/cases/tm2harmony
+        run: |
+          make network
+      - name: Test
+        working-directory: ./tests/cases/tm2harmony
+        run: |
+          make test
+      - name: Stop Network
+        working-directory: ./tests/cases/tm2harmony
+        run: |
+          make network-down
+
+  # TODO
+  #harmony2tm-test:
