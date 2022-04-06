@@ -1,5 +1,9 @@
 name: E2E Test
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 env:
   CACHE_BIN_RELAYER_KEY: bin-relayer
