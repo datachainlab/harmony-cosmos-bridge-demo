@@ -97,11 +97,15 @@ func (c *Chain) TxCreateClient(msg *clienttypes.MsgCreateClient) (*harmonytypes.
 	if err != nil {
 		return nil, err
 	}
+	latestHeight := clientState.GetLatestHeight()
 	log.Printf("TxCreateClient: ClientType: %+v, Height: %+v\n", clientState.ClientType(),
-		clientState.GetLatestHeight().GetRevisionHeight())
+		latestHeight.GetRevisionHeight())
 	return c.txIbcHandler(methodCreateClient, ibchandler.IBCMsgsMsgCreateClient{
-		ClientType:          clientState.ClientType(),
-		Height:              clientState.GetLatestHeight().GetRevisionHeight(),
+		ClientType: clientState.ClientType(),
+		Height: ibchandler.HeightData{
+			RevisionNumber: latestHeight.GetRevisionNumber(),
+			RevisionHeight: latestHeight.GetRevisionHeight(),
+		},
 		ClientStateBytes:    clientStateBytes,
 		ConsensusStateBytes: consensusStateBytes,
 	})
@@ -153,8 +157,8 @@ func (c *Chain) TxConnectionOpenTry(msg *conntypes.MsgConnectionOpenTry) (*harmo
 		ProofInit:            msg.ProofInit,
 		ProofClient:          msg.ProofClient,
 		ProofConsensus:       msg.ProofConsensus,
-		ProofHeight:          msg.ProofHeight.RevisionHeight,
-		ConsensusHeight:      msg.ConsensusHeight.RevisionHeight,
+		ProofHeight:          ibchandler.HeightData(msg.ProofHeight),
+		ConsensusHeight:      ibchandler.HeightData(msg.ConsensusHeight),
 	})
 }
 
@@ -174,8 +178,8 @@ func (c *Chain) TxConnectionOpenAck(msg *conntypes.MsgConnectionOpenAck) (*harmo
 		ProofTry:                 msg.ProofTry,
 		ProofClient:              msg.ProofClient,
 		ProofConsensus:           msg.ProofConsensus,
-		ProofHeight:              msg.ProofHeight.RevisionHeight,
-		ConsensusHeight:          msg.ConsensusHeight.RevisionHeight,
+		ProofHeight:              ibchandler.HeightData(msg.ProofHeight),
+		ConsensusHeight:          ibchandler.HeightData(msg.ConsensusHeight),
 	})
 }
 
@@ -183,7 +187,7 @@ func (c *Chain) TxConnectionOpenConfirm(msg *conntypes.MsgConnectionOpenConfirm)
 	return c.txIbcHandler(methodConnectionOpenConfirm, ibchandler.IBCMsgsMsgConnectionOpenConfirm{
 		ConnectionId: msg.ConnectionId,
 		ProofAck:     msg.ProofAck,
-		ProofHeight:  msg.ProofHeight.RevisionHeight,
+		ProofHeight:  ibchandler.HeightData(msg.ProofHeight),
 	})
 }
 
@@ -213,7 +217,7 @@ func (c *Chain) TxChannelOpenTry(msg *chantypes.MsgChannelOpenTry) (*harmonytype
 		},
 		CounterpartyVersion: msg.CounterpartyVersion,
 		ProofInit:           msg.ProofInit,
-		ProofHeight:         msg.ProofHeight.RevisionHeight,
+		ProofHeight:         ibchandler.HeightData(msg.ProofHeight),
 	})
 }
 
@@ -224,7 +228,7 @@ func (c *Chain) TxChannelOpenAck(msg *chantypes.MsgChannelOpenAck) (*harmonytype
 		CounterpartyVersion:   msg.CounterpartyVersion,
 		CounterpartyChannelId: msg.CounterpartyChannelId,
 		ProofTry:              msg.ProofTry,
-		ProofHeight:           msg.ProofHeight.RevisionHeight,
+		ProofHeight:           ibchandler.HeightData(msg.ProofHeight),
 	})
 }
 
@@ -233,7 +237,7 @@ func (c *Chain) TxChannelOpenConfirm(msg *chantypes.MsgChannelOpenConfirm) (*har
 		PortId:      msg.PortId,
 		ChannelId:   msg.ChannelId,
 		ProofAck:    msg.ProofAck,
-		ProofHeight: msg.ProofHeight.RevisionHeight,
+		ProofHeight: ibchandler.HeightData(msg.ProofHeight),
 	})
 }
 
@@ -250,7 +254,7 @@ func (c *Chain) TxRecvPacket(msg *chantypes.MsgRecvPacket) (*harmonytypes.Transa
 			TimeoutTimestamp:   msg.Packet.TimeoutTimestamp,
 		},
 		Proof:       msg.ProofCommitment,
-		ProofHeight: msg.ProofHeight.RevisionHeight,
+		ProofHeight: ibchandler.HeightData(msg.ProofHeight),
 	})
 }
 
@@ -268,7 +272,7 @@ func (c *Chain) TxAcknowledgement(msg *chantypes.MsgAcknowledgement) (*harmonyty
 		},
 		Acknowledgement: msg.Acknowledgement,
 		Proof:           msg.ProofAcked,
-		ProofHeight:     msg.ProofHeight.RevisionHeight,
+		ProofHeight:     ibchandler.HeightData(msg.ProofHeight),
 	})
 }
 

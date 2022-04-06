@@ -166,7 +166,11 @@ func (c *Chain) StartEventListener(dst core.ChainI, strategy core.StrategyI) {
 
 // QueryClientConsensusState retrevies the latest consensus state for a client in state at a given height
 func (c *Chain) QueryClientConsensusState(height int64, dstClientConsHeight ibcexported.Height) (*clienttypes.QueryConsensusStateResponse, error) {
-	s, found, err := c.ibcHost.GetConsensusState(c.CallOpts(context.Background(), height), c.pathEnd.ClientID, dstClientConsHeight.GetRevisionHeight())
+	dstH := ibchost.HeightData{
+		RevisionNumber: dstClientConsHeight.GetRevisionNumber(),
+		RevisionHeight: dstClientConsHeight.GetRevisionHeight(),
+	}
+	s, found, err := c.ibcHost.GetConsensusState(c.CallOpts(context.Background(), height), c.pathEnd.ClientID, dstH)
 	if err != nil {
 		return nil, err
 	} else if !found {
