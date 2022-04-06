@@ -18,8 +18,8 @@
   "scripts": {
     "compile": "truffle compile",
     "migrate": "npm run migrate-local-shard0 && npm run migrate-local-shard1",
-    "migrate-local-shard0": "truffle migrate --reset --skip-dry-run --network local_shard_0 --verbose-rpc",
-    "migrate-local-shard1": "truffle migrate --reset --skip-dry-run --network local_shard_1 --verbose-rpc",
+    "migrate-local-shard0": "truffle migrate --reset --skip-dry-run --network local_shard_0",
+    "migrate-local-shard1": "truffle migrate --reset --skip-dry-run --network local_shard_1",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
