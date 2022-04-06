@@ -32,7 +32,7 @@ network-harmony-down:
 test:
 	./scripts/fixture
 	./scripts/init-rly
-	#./scripts/handshake
+	./scripts/handshake
 	#./scripts/test-tx
 
 .PHONY: network-down
