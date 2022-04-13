@@ -42,9 +42,11 @@ RUN curl -L -o /go/bin/hmy https://harmony.one/hmycli \
 
 WORKDIR $GOPATH/src/github.com/harmony-one/harmony-test/localnet
 
+
 COPY scripts scripts
 COPY configs configs
 
 RUN chmod +x $GOPATH/src/github.com/harmony-one/harmony-test/localnet/scripts/run-localnet.sh
 WORKDIR $GOPATH/src/github.com/harmony-one/harmony
+COPY hmyscripts/kill_node.sh ./test/
 ENTRYPOINT ["/go/src/github.com/harmony-one/harmony-test/localnet/scripts/run-localnet.sh"]
