@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
+	github.com/confio/ics23/go v0.6.6
 	github.com/cosmos/cosmos-sdk v0.43.0-beta1
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go v1.0.0-beta1
