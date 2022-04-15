@@ -34,10 +34,10 @@ function setup() {
 
 function build_and_start_localnet() {
   local localnet_log="$harmony_dir/localnet_deploy.log"
-  rm -rf "$harmony_dir/tmp_log*"
-  rm -rf "$harmony_dir/.dht*"
-  rm -f "$localnet_log"
-  rm -f "$harmony_dir/*.rlp"
+#  rm -rf "$harmony_dir/tmp_log*"
+#  rm -rf "$harmony_dir/.dht*"
+#  rm -f "$localnet_log"
+#  rm -f "$harmony_dir/*.rlp"
   pushd "$(pwd)"
   cd "$harmony_dir"
   bash ./test/deploy.sh -e -B -D 60000 "$localnet_config" 2>&1 | tee "$localnet_log"
