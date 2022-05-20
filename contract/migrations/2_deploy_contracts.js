@@ -5,6 +5,7 @@ const IBCChannel = artifacts.require("@hyperledger-labs/yui-ibc-solidity/IBCChan
 const IBCHandler = artifacts.require("@hyperledger-labs/yui-ibc-solidity/IBCHandler");
 const IBCMsgs = artifacts.require("@hyperledger-labs/yui-ibc-solidity/IBCMsgs");
 const IBCIdentifier = artifacts.require("@hyperledger-labs/yui-ibc-solidity/IBCIdentifier");
+const Identifier = artifacts.require("@datachainlab/tendermint-sol/Identifier");
 const TendermintLightClient = artifacts.require("@datachainlab/tendermint-sol/TendermintLightClient");
   // libs
 const Bytes = artifacts.require("@datachainlab/tendermint-sol/Bytes");
@@ -28,6 +29,9 @@ module.exports = function (deployer) {
   });
   deployer.deploy(IBCChannel).then(function() {
     return deployer.link(IBCChannel, [IBCHandler]);
+  });
+  deployer.deploy(Identifier).then(function() {
+    return deployer.link(Identifier, [TendermintLightClient]);
   });
   deployer.deploy(Bytes);
   deployer.link(Bytes, TendermintLightClient);

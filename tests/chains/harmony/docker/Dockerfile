@@ -19,7 +19,7 @@ RUN git clone https://github.com/harmony-one/harmony.git -b ${HARMONY_TAG} --dep
 # TODO
 # Currently, TendermintLightClient exceeds MaxCodeSize
 RUN cd harmony && \
-    sed -i 's/24576/49152/' internal/params/protocol_params.go
+    sed -i 's/24576/61440/' internal/params/protocol_params.go
 
 # Build to fetch all dependencies for faster test builds
 RUN cd harmony && go mod tidy && go get github.com/pborman/uuid && go get github.com/rjeczalik/notify \
