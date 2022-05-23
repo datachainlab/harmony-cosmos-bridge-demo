@@ -139,7 +139,8 @@ func (pr *Prover) SetupHeader(dstChain core.LightClientIBCQueryierI, srcHeader c
 
 	// inject TrustedHeight as latest height stored on counterparty client
 	trustedHeight := cs.GetLatestHeight().(clienttypes.Height)
-	h.TrustedHeight = types.NewHeightFromTm(trustedHeight)
+	th := types.Height(trustedHeight)
+	h.TrustedHeight = &th
 
 	// query TrustedValidators at Trusted Height from srcChain
 	valSet, err := srcChain.QueryValsetAtHeight(trustedHeight)

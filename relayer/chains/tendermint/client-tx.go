@@ -24,7 +24,7 @@ func createClient(
 	// Blank Client State
 	clientState := tmclient.NewClientState(
 		dstHeader.SignedHeader.Header.ChainId,
-		tmclient.NewFractionFromTm(light.DefaultTrustLevel),
+		tmclient.Fraction(light.DefaultTrustLevel),
 		trustingPeriod,
 		unbondingPeriod,
 		time.Minute*10,

@@ -1,7 +1,6 @@
 package types
 
 import (
-	//crypto "github.com/tendermint/tendermint/proto/tendermint/crypto"
 	crypto "github.com/tendermint/tendermint/crypto/ed25519"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
@@ -30,7 +29,6 @@ func (v *ValidatorSet) ValidatorSet() *tmtypes.ValidatorSet {
 	return vset
 }
 
-// TODO tmproto or tmtypes
 func NewValidatorFromTm(v *tmtypes.Validator) *Validator {
 	return &Validator{
 		PubKey:      v.PubKey.Bytes(),
