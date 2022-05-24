@@ -6,7 +6,7 @@
     "node": "16.x"
   },
   "dependencies": {
-    "@hyperledger-labs/yui-ibc-solidity": "hyperledger-labs/yui-ibc-solidity#fedb647dbd69391c316933e4980a4aa5bfab560a",
+    "@hyperledger-labs/yui-ibc-solidity": "hyperledger-labs/yui-ibc-solidity#252e45af2470cde02deb19866dcd462af0d89e93",
     "@datachainlab/tendermint-sol": "datachainlab/tendermint-sol#4423b99b2b3683cf05161e4e323dd7b48ee65d91"
   },
   "devDependencies": {
