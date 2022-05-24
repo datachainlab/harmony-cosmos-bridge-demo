@@ -1,0 +1,20 @@
+syntax = "proto3";
+package relayer.chains.tendermint.config;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/datachainlab/harmony-cosmos-bridge-demo/relayer/chains/tendermint";
+option (gogoproto.goproto_getters_all) = false;
+
+message ChainConfig {
+  string key = 1;
+  string chain_id = 2;
+  string rpc_addr = 3;
+  string account_prefix = 4;
+  double gas_adjustment = 5;
+  string gas_prices = 6;
+}
+
+message ProverConfig {
+  string trusting_period = 1;
+}
