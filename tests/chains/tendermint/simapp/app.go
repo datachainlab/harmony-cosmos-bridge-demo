@@ -93,8 +93,8 @@ import (
 	ibctypes "github.com/cosmos/ibc-go/modules/core/types"
 	ibcmock "github.com/cosmos/ibc-go/testing/mock"
 
-	mockclient "github.com/datachainlab/ibc-mock-client/modules/light-clients/xx-mock"
-	mockclienttypes "github.com/datachainlab/ibc-mock-client/modules/light-clients/xx-mock/types"
+	hmyclient "github.com/datachainlab/ibc-harmony-client/modules/light-clients/harmony"
+	hmyclienttypes "github.com/datachainlab/ibc-harmony-client/modules/light-clients/harmony/types"
 
 	// unnamed import of statik for swagger UI support
 	_ "github.com/cosmos/cosmos-sdk/client/docs/statik"
@@ -125,7 +125,7 @@ var (
 		slashing.AppModuleBasic{},
 		ibc.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
-		mockclient.AppModuleBasic{},
+		hmyclient.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
 		transfer.AppModuleBasic{},
@@ -494,7 +494,7 @@ func (app *SimApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.
 		panic(err)
 	}
 	ibcGenesisState := ibctypes.DefaultGenesisState()
-	ibcGenesisState.ClientGenesis.Params.AllowedClients = append(ibcGenesisState.ClientGenesis.Params.AllowedClients, mockclienttypes.Mock)
+	ibcGenesisState.ClientGenesis.Params.AllowedClients = append(ibcGenesisState.ClientGenesis.Params.AllowedClients, hmyclienttypes.HarmonyClient)
 	genesisState[ibc.AppModule{}.Name()] = app.appCodec.MustMarshalJSON(ibcGenesisState)
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
