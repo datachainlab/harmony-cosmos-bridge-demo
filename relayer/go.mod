@@ -30,4 +30,8 @@ replace (
 	github.com/ethereum/go-ethereum v1.9.25 => github.com/ethereum/go-ethereum v1.9.9
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 	github.com/harmony-one/go-sdk => github.com/datachainlab/go-sdk v1.2.9-0.20220106070458-8ce5f5c807b2
+	// TODO: modify the branch and move it to datachainlab
+	// Trying to use go bindings with geth v1.9.10, which works with solidity 6.0+
+	// ref. https://github.com/ethereum/go-ethereum/pull/20482
+	github.com/hyperledger-labs/yui-ibc-solidity => github.com/3100/yui-ibc-solidity v0.0.0-20220606110415-847c661316b7
 )
