@@ -1,7 +1,7 @@
 FROM golang:1.16
 
 ENV API_ENDPOINT=
-# ex: v4.3.1
+# ex: v4.3.4
 ARG HARMONY_TAG
 ARG BLS_TAG
 
