@@ -55,7 +55,7 @@ func (chain *Chain) findPacket(
 			chain.config.IBCHandlerAddress(),
 		},
 		Topics: [][]common.Hash{{
-			abiSendPacket.ID,
+			abiSendPacket.ID(),
 		}},
 	}
 	logsData, err := chain.findLogsData(ctx, query)
@@ -63,7 +63,8 @@ func (chain *Chain) findPacket(
 		return nil, err
 	}
 	for _, data := range logsData {
-		if values, err := abiSendPacket.Inputs.Unpack(data); err != nil {
+		values := make([]interface{}, 0)
+		if err := abiSendPacket.Inputs.Unpack(&values, data); err != nil {
 			return nil, err
 		} else {
 			p := values[0].(struct {
@@ -111,7 +112,7 @@ func (chain *Chain) getAllPackets(
 			chain.config.IBCHandlerAddress(),
 		},
 		Topics: [][]common.Hash{{
-			abiSendPacket.ID,
+			abiSendPacket.ID(),
 		}},
 	}
 	logsData, err := chain.findLogsData(ctx, query)
@@ -120,7 +121,8 @@ func (chain *Chain) getAllPackets(
 	}
 
 	for _, data := range logsData {
-		if values, err := abiSendPacket.Inputs.Unpack(data); err != nil {
+		values := make([]interface{}, 0)
+		if err := abiSendPacket.Inputs.Unpack(&values, data); err != nil {
 			return nil, err
 		} else {
 			p := values[0].(struct {
@@ -166,7 +168,7 @@ func (chain *Chain) findAcknowledgement(
 			chain.config.IBCHandlerAddress(),
 		},
 		Topics: [][]common.Hash{{
-			abiWriteAcknowledgement.ID,
+			abiWriteAcknowledgement.ID(),
 		}},
 	}
 	logsData, err := chain.findLogsData(ctx, query)
@@ -175,7 +177,8 @@ func (chain *Chain) findAcknowledgement(
 	}
 
 	for _, data := range logsData {
-		if values, err := abiWriteAcknowledgement.Inputs.Unpack(data); err != nil {
+		values := make([]interface{}, 0)
+		if err := abiWriteAcknowledgement.Inputs.Unpack(&values, data); err != nil {
 			return nil, err
 		} else {
 			if len(values) != 4 {
@@ -207,7 +210,7 @@ func (chain *Chain) getAllAcknowledgements(
 			chain.config.IBCHandlerAddress(),
 		},
 		Topics: [][]common.Hash{{
-			abiWriteAcknowledgement.ID,
+			abiWriteAcknowledgement.ID(),
 		}},
 	}
 	logsData, err := chain.findLogsData(ctx, query)
@@ -215,7 +218,8 @@ func (chain *Chain) getAllAcknowledgements(
 		return nil, err
 	}
 	for _, data := range logsData {
-		if values, err := abiWriteAcknowledgement.Inputs.Unpack(data); err != nil {
+		values := make([]interface{}, 0)
+		if err := abiWriteAcknowledgement.Inputs.Unpack(&values, data); err != nil {
 			return nil, err
 		} else {
 			if len(values) != 4 {
