@@ -9,8 +9,8 @@ services:
     build:
       context: ./docker
       args:
-        - HARMONY_TAG=v4.3.1
-        - BLS_TAG=v0.0.6
+        - HARMONY_TAG
+        - BLS_TAG
     environment:
       API_ENDPOINT: http://localhost:9598
     ports:

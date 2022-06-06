@@ -1,6 +1,6 @@
 include ../../docker.mk
 
-HARMONY_TAG?=v4.3.1
+HARMONY_TAG?=v4.3.4
 BLS_TAG?=v0.0.6
 NETWORK_ID?=2
 
@@ -38,7 +38,8 @@ up-scaffold-with-check:
 
 .PHONY: up-scaffold
 up-scaffold:
-	${DOCKER_COMPOSE} up --build -d
+	${DOCKER_COMPOSE} build --build-arg HARMONY_TAG=${HARMONY_TAG} --build-arg BLS_TAG=${BLS_TAG} && \
+		${DOCKER_COMPOSE} up -d
 
 .PHONY: down-scaffold
 down-scaffold:

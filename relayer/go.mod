@@ -11,7 +11,7 @@ require (
 	github.com/gogo/protobuf v1.3.3
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/harmony-one/go-sdk v1.2.8
-	github.com/harmony-one/harmony v1.10.3-0.20211125131737-65614950c7f8
+	github.com/harmony-one/harmony v1.10.3-0.20220129011036-4ea9072e5eda
 	github.com/hyperledger-labs/yui-ibc-solidity v0.0.0-20220329081338-252e45af2470
 	github.com/hyperledger-labs/yui-relayer v0.1.1-0.20211209032245-495b5eed40e2
 	github.com/spf13/cobra v1.1.3
