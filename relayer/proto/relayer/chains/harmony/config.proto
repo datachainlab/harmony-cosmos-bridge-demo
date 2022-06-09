@@ -24,14 +24,6 @@ message ChainConfig {
   int64 gas_price = 11;
 }
 
-// TODO decide
 message ProverConfig {
-  string chain_id = 1;
-  // human name of a chain-id
-  int64  harmony_chain_id = 2;
-  uint32 shard_id = 3;
-  string shard_rpc_addr = 4;
-  // if shard_id = 0, set the same address as shard_rpc_addr
-  string beacon_rpc_addr = 5;
-  string ibc_host_address = 6;
+  string trusting_period = 1;
 }

@@ -7,6 +7,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.43.0-beta1
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go v1.0.0-beta1
+	github.com/datachainlab/ibc-harmony-client v0.0.0-20220621031218-a0a514daf9d0
 	github.com/ethereum/go-ethereum v1.9.25
 	github.com/gogo/protobuf v1.3.3
 	github.com/google/gofuzz v1.2.0 // indirect
@@ -14,6 +15,7 @@ require (
 	github.com/harmony-one/harmony v1.10.3-0.20220129011036-4ea9072e5eda
 	github.com/hyperledger-labs/yui-ibc-solidity v0.0.0-20220329081338-252e45af2470
 	github.com/hyperledger-labs/yui-relayer v0.1.1-0.20211209032245-495b5eed40e2
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
 	github.com/tendermint/tendermint v0.34.10

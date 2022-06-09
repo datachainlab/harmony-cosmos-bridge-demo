@@ -17,7 +17,6 @@ import (
 	"github.com/cosmos/ibc-go/modules/core/exported"
 	ibcexported "github.com/cosmos/ibc-go/modules/core/exported"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
 	sdkcommon "github.com/harmony-one/go-sdk/pkg/common"
 	"github.com/harmony-one/harmony/accounts/abi"
 	"github.com/harmony-one/harmony/accounts/keystore"
@@ -42,9 +41,8 @@ type Chain struct {
 	homePath string
 	codec    codec.ProtoCodecMarshaler
 
-	keyStore    *keystore.KeyStore
-	client      *Client
-	queryClient *ethclient.Client
+	keyStore *keystore.KeyStore
+	client   *Client
 
 	ibcHostAbi    abi.ABI
 	ibcHandlerAbi abi.ABI
@@ -59,6 +57,7 @@ func NewChain(config ChainConfig) (*Chain, error) {
 	client := NewHarmonyClient(config.ShardRpcAddr)
 	chainId, err := config.ChainID()
 	if err != nil {
+		fmt.Println("NewChain error 1")
 		return nil, err
 	}
 	ethClient, err := NewETHClient(config.ShardRpcAddr)
@@ -87,7 +86,6 @@ func NewChain(config ChainConfig) (*Chain, error) {
 		config:        config,
 		chainId:       chainId,
 		client:        client,
-		queryClient:   ethClient,
 		ibcHost:       ibcHost,
 		ibcHandler:    ibcHandler,
 		ibcHostAbi:    ibcHostAbi,

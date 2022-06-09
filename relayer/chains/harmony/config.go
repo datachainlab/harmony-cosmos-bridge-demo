@@ -2,6 +2,7 @@ package harmony
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	sdkcommon "github.com/harmony-one/go-sdk/pkg/common"
@@ -33,14 +34,13 @@ func (c ChainConfig) GasPriceDec() numeric.Dec {
 }
 
 func (c ProverConfig) Build(chain core.ChainI) (core.ProverI, error) {
-	ethChain, ok := chain.(*Chain)
+	hmyChain, ok := chain.(*Chain)
 	if !ok {
 		return nil, fmt.Errorf("invalid chain type")
 	}
-	return NewProver(ethChain, c)
+	return NewProver(hmyChain, c)
 }
 
-func (c ProverConfig) IBCHostAddress() common.Address {
-	return common.HexToAddress(c.IbcHostAddress)
-
+func (c ProverConfig) TrustingPeriodDuration() (time.Duration, error) {
+	return time.ParseDuration(c.TrustingPeriod)
 }
