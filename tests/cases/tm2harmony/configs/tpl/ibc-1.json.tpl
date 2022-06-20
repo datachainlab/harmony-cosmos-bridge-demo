@@ -14,6 +14,7 @@
     "gas_price": 1000000000
   },
   "prover": {
-    "@type": "/relayer.provers.mock.config.ProverConfig"
+    "@type": "/relayer.chains.harmony.config.ProverConfig",
+    "trusting_period": "120h"
   }
 }
