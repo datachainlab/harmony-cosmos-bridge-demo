@@ -38,6 +38,11 @@ jobs:
       - name: Build harmony libs
         if: steps.cache-harmony-libs.outputs.cache-hit != 'true'
         run: make -C relayer harmony-libs
+      # TODO remove when the private repo becomes public
+      - name: Git config for private repository
+        env:
+          GOPRIVATE: github.com/datachainlab/ibc-harmony-client
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
       - name: Build
         run: make -C relayer build
       - name: Save relayer binary cache
@@ -60,6 +65,9 @@ jobs:
       - name: Build docker images
         if: steps.cache-docker-tendermint.outputs.cache-hit != 'true'
         working-directory: ./tests/chains/tendermint
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PAT: ${{ secrets.PAT }}
         run: |
           make docker-image
       - name: Save docker images
