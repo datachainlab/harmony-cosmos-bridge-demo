@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/big"
 	"strconv"
 
@@ -132,11 +133,11 @@ func (chain *Chain) CallOpts(ctx context.Context, height int64) *bind.CallOpts {
 func (c *Client) sendRPC(meth string, params []interface{}) (interface{}, error) {
 	rep, err := c.messenger.SendRPC(meth, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("rpc %s with params %v failed: %w", meth, params, err)
 	}
 	val, ok := rep["result"]
 	if !ok {
-		return nil, errors.New("invalid rpc response")
+		return nil, fmt.Errorf("rpc %s with params %v returns invalid response", meth, params)
 	}
 	return val, nil
 }

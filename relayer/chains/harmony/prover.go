@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"math/big"
 	"strings"
 
@@ -18,6 +19,7 @@ import (
 	hmylctypes "github.com/datachainlab/ibc-harmony-client/modules/light-clients/harmony/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/harmony-one/harmony/block"
 	v3 "github.com/harmony-one/harmony/block/v3"
 	hmytypes "github.com/harmony-one/harmony/core/types"
 	rpcv2 "github.com/harmony-one/harmony/rpc/v2"
@@ -67,18 +69,18 @@ func (pr *Prover) CreateMsgCreateClient(clientID string, dstHeader core.HeaderI,
 	if !ok {
 		return nil, errors.New("dstHeader must be an harmony header")
 	}
-	beaconHeader, err := decodeV3(h.BeaconHeaders[0].Header)
+	beaconHeader, err := decodeV3(h.BeaconHeader.Header)
 	if err != nil {
 		return nil, err
 	}
 	if l := len(beaconHeader.ShardState()); l == 0 {
-		// The last beacon header of epoch is needed
+		// The last beacon header of the previous epoch is needed
 		prevHeader, err := pr.queryEpochLastHeader(big.NewInt(0).Sub(beaconHeader.Epoch(), big.NewInt(1)), true)
 		if err != nil {
 			return nil, err
 		}
-		h.BeaconHeaders = append([]hmylctypes.BeaconHeader{prevHeader.BeaconHeaders[0]}, h.BeaconHeaders...)
-		beaconHeader, err = decodeV3(prevHeader.BeaconHeaders[0].Header)
+		h.EpochHeaders = append([]hmylctypes.BeaconHeader{*prevHeader.BeaconHeader}, h.EpochHeaders...)
+		beaconHeader, err = decodeV3(prevHeader.BeaconHeader.Header)
 		if err != nil {
 			return nil, err
 		}
@@ -176,7 +178,7 @@ func (pr *Prover) SetupHeader(dstChain core.LightClientIBCQueryierI, baseSrcHead
 	beaconEpoch := header.GetBeaconEpoch()
 	gapEpochSize := beaconEpoch.Int64() - trustedHeader.Epoch.Int64()
 	if gapEpochSize > 0 {
-		prevHeaders := make([]hmylctypes.BeaconHeader, gapEpochSize)
+		epochHeaders := make([]hmylctypes.BeaconHeader, gapEpochSize)
 		prevEpoch := trustedHeader.Epoch
 		for i := 0; i < int(gapEpochSize); i++ {
 			// The last beacon header of epoch is needed to update committee
@@ -184,10 +186,10 @@ func (pr *Prover) SetupHeader(dstChain core.LightClientIBCQueryierI, baseSrcHead
 			if err != nil {
 				return nil, err
 			}
-			prevHeaders[i] = prevHeader.BeaconHeaders[0]
+			epochHeaders[i] = *prevHeader.BeaconHeader
 			prevEpoch.Add(prevEpoch, big.NewInt(1))
 		}
-		header.BeaconHeaders = append(prevHeaders, header.BeaconHeaders...)
+		header.EpochHeaders = epochHeaders
 	}
 	return header, nil
 }
@@ -212,7 +214,7 @@ func (pr *Prover) QueryClientConsensusStateWithProof(height int64, dstClientCons
 		return nil, err
 	}
 
-	key, err := hmylctypes.ConsensusStateCommitmentSlot(pr.chain.Path().ClientID, dstClientConsHeight.GetRevisionHeight())
+	key, err := hmylctypes.ConsensusStateCommitmentSlot(pr.chain.Path().ClientID, dstClientConsHeight)
 	if err != nil {
 		return nil, err
 	}
@@ -381,8 +383,14 @@ func (pr *Prover) queryEpochLastHeader(epoch *big.Int, skipsShardHeader bool) (*
 				if err != nil {
 					return nil, err
 				}
-				if !bytes.Equal(crossLink.HashF.Bytes(), shardHeader.TransactionsRoot.Bytes()) {
-					return nil, errors.New("invalid cross link")
+				shv3, err := convertHeader(shardHeader)
+				if err != nil {
+					return nil, err
+				}
+				b := block.Header{Header: shv3}
+				if !bytes.Equal(crossLink.HashF.Bytes(), b.Hash().Bytes()) {
+					return nil, fmt.Errorf("invalid cross link on beacon block %d, shard block %d. expected: %s, got: %s",
+						beaconHeader.Number.Uint64(), shardHeader.Number.Uint64(), crossLink.HashF.Hex(), b.Hash().Hex())
 				}
 			}
 		}
@@ -406,12 +414,10 @@ func (pr *Prover) queryEpochLastHeader(epoch *big.Int, skipsShardHeader bool) (*
 	}
 	return &hmylctypes.Header{
 		ShardHeader: shRLP,
-		BeaconHeaders: []hmylctypes.BeaconHeader{
-			{
-				Header:       bhRLP,
-				CommitSig:    nextHeader.LastCommitSignature,
-				CommitBitmap: nextHeader.LastCommitBitmap,
-			},
+		BeaconHeader: &hmylctypes.BeaconHeader{
+			Header:       bhRLP,
+			CommitSig:    nextHeader.LastCommitSignature,
+			CommitBitmap: nextHeader.LastCommitBitmap,
 		},
 		CrossLinkIndex: uint32(crossLinkIndex),
 		AccountProof:   proof,
@@ -442,11 +448,11 @@ func (pr *Prover) queryLatestHeaderForBeacon() (out core.HeaderI, err error) {
 	}
 	header := &hmylctypes.Header{
 		ShardHeader: nil,
-		BeaconHeaders: []hmylctypes.BeaconHeader{{
+		BeaconHeader: &hmylctypes.BeaconHeader{
 			Header:       bhRLP,
 			CommitSig:    nextHeader.LastCommitSignature,
 			CommitBitmap: nextHeader.LastCommitBitmap,
-		}},
+		},
 		CrossLinkIndex: 0,
 		AccountProof:   proof,
 	}
@@ -497,8 +503,14 @@ func (pr *Prover) queryLatestHeaderForShard() (out core.HeaderI, err error) {
 		if err != nil {
 			return nil, err
 		}
-		if !bytes.Equal(crossLink.HashF.Bytes(), shardHeader.TransactionsRoot.Bytes()) {
-			return nil, errors.New("invalid cross link")
+		shv3, err := convertHeader(shardHeader)
+		if err != nil {
+			return nil, err
+		}
+		b := block.Header{Header: shv3}
+		if !bytes.Equal(crossLink.HashF.Bytes(), b.Hash().Bytes()) {
+			return nil, fmt.Errorf("invalid cross link on beacon block %d, shard block %d. expected: %s, got: %s",
+				beaconHeader.Number.Uint64(), shardHeader.Number.Uint64(), crossLink.HashF.Hex(), b.Hash().Hex())
 		}
 		nextBeaconHeader, err := pr.beaconClient.FullHeader(context.Background(), height)
 		if err != nil {
@@ -523,12 +535,10 @@ func (pr *Prover) queryLatestHeaderForShard() (out core.HeaderI, err error) {
 		}
 		header = &hmylctypes.Header{
 			ShardHeader: shRLP,
-			BeaconHeaders: []hmylctypes.BeaconHeader{
-				{
-					Header:       bhRLP,
-					CommitSig:    nextBeaconHeader.LastCommitSignature,
-					CommitBitmap: nextBeaconHeader.LastCommitBitmap,
-				},
+			BeaconHeader: &hmylctypes.BeaconHeader{
+				Header:       bhRLP,
+				CommitSig:    nextBeaconHeader.LastCommitSignature,
+				CommitBitmap: nextBeaconHeader.LastCommitBitmap,
 			},
 			CrossLinkIndex: uint32(crossLinkIndex),
 			AccountProof:   proof,

@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -117,7 +116,7 @@ func decodeStorageHash(accountRLP []byte) ([]byte, error) {
 		return nil, err
 	}
 	if len(account) <= AccountStorageRootIndex {
-		return nil, fmt.Errorf("invalid decode account")
+		return nil, errors.New("invalid decode account")
 	}
 	return account[AccountStorageRootIndex], nil
 }
