@@ -41,9 +41,11 @@ jobs:
       # TODO remove when the private repo becomes public
       - name: Git config for private repository
         env:
-          GOPRIVATE: github.com/datachainlab/ibc-harmony-client
-        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+          PAT: ${{ secrets.PAT }}
+        run: git config --global url."https://$PAT:x-oauth-basic@github.com/".insteadOf "https://github.com/"
       - name: Build
+        env:
+          GOPRIVATE: github.com/datachainlab/ibc-harmony-client
         run: make -C relayer build
       - name: Save relayer binary cache
         uses: actions/cache@v2
