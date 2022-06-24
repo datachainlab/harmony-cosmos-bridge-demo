@@ -19,9 +19,16 @@ message ChainConfig {
   // if shard_id = 0, set the same key as shard_private_key
   string beacon_private_key = 7;
   string ibc_host_address = 8;
+  // for convenience of demonstration
   string ibc_handler_address = 9;
-  uint64 gas_limit = 10;
-  int64 gas_price = 11;
+  // for convenience of demonstration
+  string ics20_bank_address = 10;
+  // for convenience of demonstration
+  string ics20_transfer_bank_address = 11;
+  // for convenience of demonstration
+  string token_address = 12;
+  uint64 gas_limit = 13;
+  int64 gas_price = 14;
 }
 
 message ProverConfig {

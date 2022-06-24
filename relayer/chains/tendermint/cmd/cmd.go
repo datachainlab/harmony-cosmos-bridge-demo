@@ -16,6 +16,7 @@ func TendermintCmd(m codec.Codec, ctx *config.Context) *cobra.Command {
 		configCmd(m),
 		keysCmd(ctx),
 		lightCmd(ctx),
+		xfersend(ctx),
 	)
 
 	return cmd

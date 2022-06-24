@@ -22,6 +22,9 @@ import (
 	"github.com/harmony-one/harmony/accounts/keystore"
 	"github.com/hyperledger-labs/yui-ibc-solidity/pkg/contract/ibchandler"
 	"github.com/hyperledger-labs/yui-ibc-solidity/pkg/contract/ibchost"
+	"github.com/hyperledger-labs/yui-ibc-solidity/pkg/contract/ics20bank"
+	"github.com/hyperledger-labs/yui-ibc-solidity/pkg/contract/ics20transferbank"
+	"github.com/hyperledger-labs/yui-ibc-solidity/pkg/contract/simpletoken"
 	"github.com/hyperledger-labs/yui-relayer/core"
 )
 
@@ -46,9 +49,16 @@ type Chain struct {
 
 	ibcHostAbi    abi.ABI
 	ibcHandlerAbi abi.ABI
+	ibcHost       *ibchost.Ibchost
+	ibcHandler    *ibchandler.Ibchandler
 
-	ibcHost    *ibchost.Ibchost
-	ibcHandler *ibchandler.Ibchandler
+	/* for demo convenience */
+	simpleTokenAbi       abi.ABI
+	ics20BankAbi         abi.ABI
+	ics20TransferBankAbi abi.ABI
+	simpleToken          *simpletoken.Simpletoken
+	ics20Bank            *ics20bank.Ics20bank
+	ics20TransferBank    *ics20transferbank.Ics20transferbank
 }
 
 var _ core.ChainI = (*Chain)(nil)
@@ -57,7 +67,6 @@ func NewChain(config ChainConfig) (*Chain, error) {
 	client := NewHarmonyClient(config.ShardRpcAddr)
 	chainId, err := config.ChainID()
 	if err != nil {
-		fmt.Println("NewChain error 1")
 		return nil, err
 	}
 	ethClient, err := NewETHClient(config.ShardRpcAddr)
@@ -72,6 +81,18 @@ func NewChain(config ChainConfig) (*Chain, error) {
 	if err != nil {
 		return nil, err
 	}
+	simpleToken, err := simpletoken.NewSimpletoken(config.SimpleTokenAddress(), ethClient)
+	if err != nil {
+		return nil, err
+	}
+	ics20Bank, err := ics20bank.NewIcs20bank(config.ICS20BankAddress(), ethClient)
+	if err != nil {
+		return nil, err
+	}
+	ics20TransferBank, err := ics20transferbank.NewIcs20transferbank(config.ICS20BankAddress(), ethClient)
+	if err != nil {
+		return nil, err
+	}
 
 	ibcHostAbi, err := abi.JSON(strings.NewReader(ibchost.IbchostABI))
 	if err != nil {
@@ -81,15 +102,33 @@ func NewChain(config ChainConfig) (*Chain, error) {
 	if err != nil {
 		return nil, err
 	}
+	simpleTokenAbi, err := abi.JSON(strings.NewReader(simpletoken.SimpletokenABI))
+	if err != nil {
+		return nil, err
+	}
+	ics20BankAbi, err := abi.JSON(strings.NewReader(ics20bank.Ics20bankABI))
+	if err != nil {
+		return nil, err
+	}
+	ics20TransferBankAbi, err := abi.JSON(strings.NewReader(ics20transferbank.Ics20transferbankABI))
+	if err != nil {
+		return nil, err
+	}
 
 	return &Chain{
-		config:        config,
-		chainId:       chainId,
-		client:        client,
-		ibcHost:       ibcHost,
-		ibcHandler:    ibcHandler,
-		ibcHostAbi:    ibcHostAbi,
-		ibcHandlerAbi: ibcHandlerAbi,
+		config:               config,
+		chainId:              chainId,
+		client:               client,
+		ibcHost:              ibcHost,
+		ibcHandler:           ibcHandler,
+		ibcHostAbi:           ibcHostAbi,
+		ibcHandlerAbi:        ibcHandlerAbi,
+		simpleToken:          simpleToken,
+		ics20Bank:            ics20Bank,
+		ics20TransferBank:    ics20TransferBank,
+		simpleTokenAbi:       simpleTokenAbi,
+		ics20BankAbi:         ics20BankAbi,
+		ics20TransferBankAbi: ics20TransferBankAbi,
 	}, nil
 }
 

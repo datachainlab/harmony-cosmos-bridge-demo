@@ -3,6 +3,7 @@ package module
 import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/datachainlab/harmony-cosmos-bridge-demo/relayer/chains/harmony"
+	"github.com/datachainlab/harmony-cosmos-bridge-demo/relayer/chains/harmony/cmd"
 	"github.com/hyperledger-labs/yui-relayer/config"
 	"github.com/spf13/cobra"
 )
@@ -23,5 +24,5 @@ func (Module) RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 
 // GetCmd returns the command
 func (Module) GetCmd(ctx *config.Context) *cobra.Command {
-	return nil
+	return cmd.HarmonyCmd(ctx.Codec, ctx)
 }
