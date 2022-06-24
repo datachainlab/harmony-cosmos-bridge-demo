@@ -75,7 +75,7 @@ func (pr *Prover) CreateMsgCreateClient(clientID string, dstHeader core.HeaderI,
 	}
 	if l := len(beaconHeader.ShardState()); l == 0 {
 		// The last beacon header of the previous epoch is needed
-		prevHeader, err := pr.queryEpochLastHeader(big.NewInt(0).Sub(beaconHeader.Epoch(), big.NewInt(1)), true)
+		prevHeader, err := pr.queryEpochLastHeader(beaconHeader.Epoch().Uint64()-1, true)
 		if err != nil {
 			return nil, err
 		}
@@ -176,10 +176,10 @@ func (pr *Prover) SetupHeader(dstChain core.LightClientIBCQueryierI, baseSrcHead
 		return nil, err
 	}
 	beaconEpoch := header.GetBeaconEpoch()
-	gapEpochSize := beaconEpoch.Int64() - trustedHeader.Epoch.Int64()
+	gapEpochSize := new(big.Int).Sub(beaconEpoch, trustedHeader.Epoch).Int64()
 	if gapEpochSize > 0 {
 		epochHeaders := make([]hmylctypes.BeaconHeader, gapEpochSize)
-		prevEpoch := trustedHeader.Epoch
+		prevEpoch := trustedHeader.Epoch.Uint64()
 		for i := 0; i < int(gapEpochSize); i++ {
 			// The last beacon header of epoch is needed to update committee
 			prevHeader, err := pr.queryEpochLastHeader(prevEpoch, true)
@@ -187,7 +187,7 @@ func (pr *Prover) SetupHeader(dstChain core.LightClientIBCQueryierI, baseSrcHead
 				return nil, err
 			}
 			epochHeaders[i] = *prevHeader.BeaconHeader
-			prevEpoch.Add(prevEpoch, big.NewInt(1))
+			prevEpoch += 1
 		}
 		header.EpochHeaders = epochHeaders
 	}
@@ -345,16 +345,16 @@ func (pr *Prover) getStorageProof(key []byte, blockNumber *big.Int) ([]byte, err
 }
 
 // When skipsShardHeader is true, the return header does not contain a shard header.
-func (pr *Prover) queryEpochLastHeader(epoch *big.Int, skipsShardHeader bool) (*hmylctypes.Header, error) {
-	height, err := pr.beaconClient.EpochLastBlock(context.Background(), epoch)
+func (pr *Prover) queryEpochLastHeader(epoch uint64, skipsShardHeader bool) (*hmylctypes.Header, error) {
+	height, err := pr.beaconClient.EpochLastBlockNumber(context.Background(), epoch)
 	if err != nil {
 		return nil, err
 	}
-	beaconHeader, err := pr.beaconClient.FullHeader(context.Background(), height.Uint64())
+	beaconHeader, err := pr.beaconClient.FullHeader(context.Background(), height)
 	if err != nil {
 		return nil, err
 	}
-	nextHeader, err := pr.beaconClient.FullHeader(context.Background(), height.Uint64()+1)
+	nextHeader, err := pr.beaconClient.FullHeader(context.Background(), height+1)
 	if err != nil {
 		return nil, err
 	}
@@ -469,13 +469,12 @@ func (pr *Prover) queryLatestHeaderForShard() (out core.HeaderI, err error) {
 	var header *hmylctypes.Header
 	// Find a crosslinked header pair.
 	// Decrease the beacon height one by one until it is found.
-	for {
+	// TODO consider iterate limit
+	for ; height > 0; height-- {
 		beaconHeader, err := pr.beaconClient.FullHeader(context.Background(), height)
 		if err != nil {
 			return nil, err
 		}
-		height = beaconHeader.Number.Uint64() - 1
-
 		if len(beaconHeader.CrossLink) == 0 {
 			continue
 		}
@@ -512,7 +511,7 @@ func (pr *Prover) queryLatestHeaderForShard() (out core.HeaderI, err error) {
 			return nil, fmt.Errorf("invalid cross link on beacon block %d, shard block %d. expected: %s, got: %s",
 				beaconHeader.Number.Uint64(), shardHeader.Number.Uint64(), crossLink.HashF.Hex(), b.Hash().Hex())
 		}
-		nextBeaconHeader, err := pr.beaconClient.FullHeader(context.Background(), height)
+		nextBeaconHeader, err := pr.beaconClient.FullHeader(context.Background(), beaconHeader.Number.Uint64()+1)
 		if err != nil {
 			return nil, err
 		}

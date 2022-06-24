@@ -57,6 +57,8 @@ func (c *Client) BlockNumber(ctx context.Context) (uint64, error) {
 	return hexutil.DecodeUint64(bns)
 }
 
+// FullHeader returns the harmony full header for the given height.
+// The complete header can be used to calculate the hash value.
 func (c *Client) FullHeader(ctx context.Context, height uint64) (*v2.BlockHeader, error) {
 	var heightArg string
 	if height >= 0 {
@@ -80,37 +82,23 @@ func (c *Client) FullHeader(ctx context.Context, height uint64) (*v2.BlockHeader
 	return &header, nil
 }
 
-// Last block number of given epoch
-func (c *Client) EpochLastBlock(ctx context.Context, epoch *big.Int) (*big.Int, error) {
-	if epoch == nil {
-		return nil, errors.New("epoch is null")
-	}
-	val, err := c.sendRPC(MethodEpochLastBlock, []interface{}{epoch.Uint64()})
+// EpochLastBlockNumber returns the last block number of the given epoch.
+// Note that it also returns the block number for a future epoch.
+func (c *Client) EpochLastBlockNumber(ctx context.Context, epoch uint64) (uint64, error) {
+	val, err := c.sendRPC(MethodEpochLastBlock, []interface{}{epoch})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
+	// TODO DEBUG remove
+	fmt.Printf("EpochLastBlock type: %T", val)
+	// TODO modify
 	num, ok := val.(float64)
 	if !ok {
-		return nil, errors.New("could not get the last block of epoch")
+		return 0, errors.New("could not get the last block of epoch")
 	}
+	// TODO modify
 	bn, _ := big.NewFloat(num).Int(nil)
-	return bn, nil
-}
-
-func (c *Client) GetLatestEpoch(ctx context.Context) (*big.Int, error) {
-	val, err := c.sendRPC(MethodGetEpoch, []interface{}{})
-	if err != nil {
-		return nil, err
-	}
-	str, ok := val.(string)
-	if !ok {
-		return nil, errors.New("could not get the latest epoch")
-	}
-	num := new(big.Int)
-	if _, ok := num.SetString(str, 10); !ok {
-		return nil, errors.New("could not convert latest epoch to number")
-	}
-	return num, nil
+	return bn.Uint64(), nil
 }
 
 func (chain *Chain) CallOpts(ctx context.Context, height int64) *bind.CallOpts {
