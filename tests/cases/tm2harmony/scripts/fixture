@@ -25,7 +25,13 @@ ${DOCKER} cp harmony-chain:/root/contracts ${FIXTURES_DIR}/harmony/
 ## generate a json file for Relayer configuration from a template file
 IBCHostAddress=$(cat ${FIXTURES_DIR}/harmony/contracts/IBCHost)
 IBCHandlerAddress=$(cat ${FIXTURES_DIR}/harmony/contracts/IBCHandler)
+SimpleTokenAddress=$(cat ${FIXTURES_DIR}/harmony/contracts/SimpleToken)
+ICS20BankAddress=$(cat ${FIXTURES_DIR}/harmony/contracts/ICS20Bank)
+ICS20TransferBankAddress=$(cat ${FIXTURES_DIR}/harmony/contracts/ICS20TransferBank)
 
 sed -e "s/\"ibc_host_address\": \"\"/\"ibc_host_address\": \"${IBCHostAddress}\"/" \
     -e "s/\"ibc_handler_address\": \"\"/\"ibc_handler_address\": \"${IBCHandlerAddress}\"/" \
+    -e "s/\"token_address\": \"\"/\"token_address\": \"${SimpleTokenAddress}\"/" \
+    -e "s/\"ics20_bank_address\": \"\"/\"ics20_bank_address\": \"${ICS20BankAddress}\"/" \
+    -e "s/\"ics20_transfer_bank_address\": \"\"/\"ics20_transfer_bank_address\": \"${ICS20TransferBankAddress}\"/" \
     configs/tpl/ibc-1.json.tpl > configs/demo/ibc-1.json
