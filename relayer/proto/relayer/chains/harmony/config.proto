@@ -11,14 +11,19 @@ message ChainConfig {
   // human name of a chain-id
   string harmony_chain_id = 2;
   uint32 shard_id = 3;
-  string rpc_addr = 4;
-
+  string shard_rpc_addr = 4;
+  // if shard_id = 0, set the same address as shard_rpc_addr
+  string beacon_rpc_addr = 5;
   // use for relayer
-  string private_key = 5;
+  string shard_private_key = 6;
+  // if shard_id = 0, set the same key as shard_private_key
+  string beacon_private_key = 7;
+  string ibc_host_address = 8;
+  string ibc_handler_address = 9;
+  uint64 gas_limit = 10;
+  int64 gas_price = 11;
+}
 
-  string ibc_host_address = 6;
-  string ibc_handler_address = 7;
-
-  uint64 gas_limit = 8;
-  int64 gas_price = 9;
+message ProverConfig {
+  string trusting_period = 1;
 }

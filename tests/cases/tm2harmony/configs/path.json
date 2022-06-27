@@ -1,7 +1,7 @@
 {
   "src": {
     "chain-id": "ibc0",
-    "client-id": "mock-client-0",
+    "client-id": "ibc-harmony-0",
     "connection-id": "connection-0",
     "channel-id": "channel-0",
     "port-id": "transfer",
