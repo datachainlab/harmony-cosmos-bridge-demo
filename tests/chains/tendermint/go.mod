@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/cosmos/cosmos-sdk v0.43.0-beta1
 	github.com/cosmos/ibc-go v1.0.0-beta1
-	github.com/datachainlab/ibc-harmony-client v0.0.0-20220623084557-d600c9e6c9b0
+	github.com/datachainlab/ibc-harmony-client v0.0.0-20220627020344-c0def938d048
 	github.com/gorilla/mux v1.8.0
 	github.com/rakyll/statik v0.1.7
 	github.com/spf13/cast v1.3.1

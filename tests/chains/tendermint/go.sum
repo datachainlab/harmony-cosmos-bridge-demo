@@ -190,8 +190,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/danieljoos/wincred v1.0.2 h1:zf4bhty2iLuwgjgpraD2E9UbvO+fe54XXGJbOwe23fU=
 github.com/danieljoos/wincred v1.0.2/go.mod h1:SnuYRW9lp1oJrZX/dXJqr0cPK5gYXqx3EJbmjhLdK9U=
-github.com/datachainlab/ibc-harmony-client v0.0.0-20220623084557-d600c9e6c9b0 h1:YgeKSfXCsX7zsb80+Sdk7mTVVrUzCw5CISTO6v2SWzA=
-github.com/datachainlab/ibc-harmony-client v0.0.0-20220623084557-d600c9e6c9b0/go.mod h1:VnDZVA6ZiKcCkCreGssvpgk9hfTw+qtHOUHDO5C19Kg=
+github.com/datachainlab/ibc-harmony-client v0.0.0-20220627020344-c0def938d048 h1:9N7f+feTy0qi9YQm606t0n2yQ4N6QN8ELo0W73mjxrI=
+github.com/datachainlab/ibc-harmony-client v0.0.0-20220627020344-c0def938d048/go.mod h1:VnDZVA6ZiKcCkCreGssvpgk9hfTw+qtHOUHDO5C19Kg=
 github.com/davecgh/go-spew v0.0.0-20171005155431-ecdeabc65495/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
