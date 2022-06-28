@@ -9,12 +9,9 @@ build:
 	. ./scripts/setup_bls_build_flags.sh && \
 	go build -o ./build/simd ./simapp/simd
 
-# TODO remove build args such as PAT, USERNAME
 .PHONY: docker-image
 docker-image:
 	$(DOCKER_BUILD) \
 		--build-arg CHAINID=ibc0 \
 		--build-arg BLS_TAG=v0.0.6 \
-		--build-arg PAT=${PAT} \
-		--build-arg USERNAME=${USERNAME} \
 		--tag="$(DOCKER_REPO)tendermint-chain:$(DOCKER_TAG)" .
