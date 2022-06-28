@@ -20,14 +20,6 @@ RUN git clone https://github.com/harmony-one/bls.git -b ${BLS_TAG} --depth 1 \
 WORKDIR /root
 COPY ./ ./
 
-# TODO remove
-# for private repo
-ARG USERNAME
-ARG PAT
-ARG GOPRIVATE=github.com/datachainlab/ibc-harmony-client
-RUN echo "machine github.com login ${USERNAME} password ${PAT}" > /root/.netrc \
-    && chmod 600 /root/.netrc
-
 RUN source ./scripts/setup_bls_build_flags.sh \
     && go build -mod=readonly -o ./build/simd ./simapp/simd
 
