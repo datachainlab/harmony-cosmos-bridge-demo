@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -eu
+
+SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
+. ${SCRIPT_DIR}/../../../scripts/util
+## load harmony lib env
+. ${SCRIPT_DIR}/env
+
+RLY_BINARY=${SCRIPT_DIR}/../../../../relayer/build/uly
+RLY="${RLY_BINARY} --debug"
+
+# XXX set proper value
+TX_INTERNAL=5
+CHAINID_ONE=ibc0
+CHAINID_TWO=ibc1
+RLYKEY=testkey
+PATH_NAME=ibc01
+
+TM_ADDRESS=$(${RLY} tendermint keys show ${CHAINID_ONE} ${RLYKEY})
+# TODO: calculate from private key in the relayer config
+# one155jp2y76nazx8uw5sa94fr0m4s5aj8e5xm6fu3
+HMY_ADDRESS=0xA5241513DA9F4463F1d4874b548dFBAC29D91f34
+BANK_ID=transfer/channel-0/samoleans
+
+echo "!!! Harmony -> Tendermint !!!"
+
+HMY_TOKEN_DENOM=$(${RLY} config show | jq -r ".chains[1].chain.token_address")
+
+echo "Before TM balance: $(${RLY} query balance ibc0 ${TM_ADDRESS})"
+echo "Before Hmy balance: $(${RLY} harmony query balance ibc1 --owner ${HMY_ADDRESS} --bank-id ${HMY_TOKEN_DENOM})"
+${RLY} harmony tx transfer ibc01 ibc1 --amount 100 --denom ${HMY_TOKEN_DENOM} --receiver ${TM_ADDRESS}
+sleep ${TX_INTERNAL}
+${RLY} tx relay ibc01
+sleep ${TX_INTERNAL}
+${RLY} tx acks ibc01
+sleep ${TX_INTERNAL}
+echo "After TM balance: $(${RLY} query balance ibc0 ${TM_ADDRESS})"
+echo "After Hmy balance: $(${RLY} harmony query balance ibc1 --owner ${HMY_ADDRESS} --bank-id ${HMY_TOKEN_DENOM})"

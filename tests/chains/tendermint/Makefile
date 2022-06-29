@@ -9,6 +9,7 @@ build:
 	. ./scripts/setup_bls_build_flags.sh && \
 	go build -o ./build/simd ./simapp/simd
 
+# TODO remove build args such as PAT, USERNAME
 .PHONY: docker-image
 docker-image:
 	$(DOCKER_BUILD) \

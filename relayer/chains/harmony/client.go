@@ -21,6 +21,7 @@ const (
 	MethodGetFullHeader  = "hmyv2_getFullHeader"
 	MethodEpochLastBlock = "hmyv2_epochLastBlock"
 	MethodGetEpoch       = "hmyv2_getEpoch"
+	MethodCall           = "hmyv2_call"
 )
 
 type Client struct {
@@ -89,18 +90,15 @@ func (c *Client) EpochLastBlockNumber(ctx context.Context, epoch uint64) (uint64
 	if err != nil {
 		return 0, err
 	}
-	// TODO DEBUG remove
-	fmt.Printf("EpochLastBlock type: %T", val)
-	// TODO modify
 	num, ok := val.(float64)
 	if !ok {
 		return 0, errors.New("could not get the last block of epoch")
 	}
-	// TODO modify
 	bn, _ := big.NewFloat(num).Int(nil)
 	return bn.Uint64(), nil
 }
 
+// if height <= 0, get the latest result
 func (chain *Chain) CallOpts(ctx context.Context, height int64) *bind.CallOpts {
 	account, err := chain.getAccount()
 	if err != nil {

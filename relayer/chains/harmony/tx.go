@@ -5,6 +5,7 @@ import (
 	"log"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	transfertypes "github.com/cosmos/ibc-go/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/modules/core/02-client/types"
 	conntypes "github.com/cosmos/ibc-go/modules/core/03-connection/types"
 	chantypes "github.com/cosmos/ibc-go/modules/core/04-channel/types"
@@ -64,6 +65,9 @@ func (c *Chain) SendMsgs(msgs []sdk.Msg) ([]byte, error) {
 			_, err = c.TxRecvPacket(msg)
 		case *chantypes.MsgAcknowledgement:
 			_, err = c.TxAcknowledgement(msg)
+		case *transfertypes.MsgTransfer:
+			_, err = c.TxMsgTransfer(msg)
+
 		default:
 			panic("illegal msg type")
 		}
@@ -277,7 +281,6 @@ func (c *Chain) TxAcknowledgement(msg *chantypes.MsgAcknowledgement) (*harmonyty
 }
 
 func (c *Chain) txIbcHandler(method string, params ...interface{}) (*harmonytypes.Transaction, error) {
-	//	return c.tx(c.config.IbcHandlerAddress, &c.ibcHandlerAbi, method, params)
 	input, err := c.ibcHandlerAbi.Pack(method, params...)
 	if err != nil {
 		log.Println("abi.Pack error")
@@ -301,7 +304,6 @@ func (c *Chain) txIbcHandler(method string, params ...interface{}) (*harmonytype
 		panic(err)
 	}
 	return controller.TransactionInfo(), nil
-
 }
 
 func (c *Chain) tx(to string, abi *abi.ABI, method string, params ...interface{}) (*harmonytypes.Transaction, error) {

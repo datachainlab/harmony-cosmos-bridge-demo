@@ -20,6 +20,8 @@ import (
 )
 
 var (
+	parsedHandlerABI abi.ABI
+
 	abiSendPacket,
 	abiWriteAcknowledgement,
 	abiGeneratedClientIdentifier,
@@ -28,7 +30,8 @@ var (
 )
 
 func init() {
-	parsedHandlerABI, err := abi.JSON(strings.NewReader(ibchandler.IbchandlerABI))
+	var err error
+	parsedHandlerABI, err = abi.JSON(strings.NewReader(ibchandler.IbchandlerABI))
 	if err != nil {
 		panic(err)
 	}
@@ -62,12 +65,14 @@ func (chain *Chain) findPacket(
 	if err != nil {
 		return nil, err
 	}
+
 	for _, data := range logsData {
-		values := make([]interface{}, 0)
-		if err := abiSendPacket.Inputs.Unpack(&values, data); err != nil {
+		packetMap := map[string]interface{}{}
+		if err := parsedHandlerABI.UnpackIntoMap(packetMap, abiSendPacket.Name, data); err != nil {
 			return nil, err
-		} else {
-			p := values[0].(struct {
+		}
+		for _, v := range packetMap {
+			p := v.(struct {
 				Sequence           uint64  "json:\"sequence\""
 				SourcePort         string  "json:\"source_port\""
 				SourceChannel      string  "json:\"source_channel\""
@@ -105,7 +110,6 @@ func (chain *Chain) getAllPackets(
 	sourceChannel string,
 ) ([]*chantypes.Packet, error) {
 	var packets []*chantypes.Packet
-
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(0),
 		Addresses: []common.Address{
@@ -119,13 +123,13 @@ func (chain *Chain) getAllPackets(
 	if err != nil {
 		return nil, err
 	}
-
 	for _, data := range logsData {
-		values := make([]interface{}, 0)
-		if err := abiSendPacket.Inputs.Unpack(&values, data); err != nil {
+		packetMap := map[string]interface{}{}
+		if err := parsedHandlerABI.UnpackIntoMap(packetMap, abiSendPacket.Name, data); err != nil {
 			return nil, err
-		} else {
-			p := values[0].(struct {
+		}
+		for _, v := range packetMap {
+			p := v.(struct {
 				Sequence           uint64  "json:\"sequence\""
 				SourcePort         string  "json:\"source_port\""
 				SourceChannel      string  "json:\"source_channel\""
@@ -176,17 +180,24 @@ func (chain *Chain) findAcknowledgement(
 		return nil, err
 	}
 
+	// TODO fix
 	for _, data := range logsData {
-		values := make([]interface{}, 0)
-		if err := abiWriteAcknowledgement.Inputs.Unpack(&values, data); err != nil {
+		packetMap := map[string]interface{}{}
+		if err := parsedHandlerABI.UnpackIntoMap(packetMap, abiWriteAcknowledgement.Name, data); err != nil {
 			return nil, err
-		} else {
+		}
+		for _, v := range packetMap {
+			values, ok := v.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid type: got %T", v)
+			}
 			if len(values) != 4 {
 				return nil, fmt.Errorf("unexpected values: %v", values)
 			}
 			if dstPortID == values[0].(string) && dstChannel == values[1].(string) && sequence == values[2].(uint64) {
 				return values[3].([]byte), nil
 			}
+
 		}
 	}
 
@@ -218,10 +229,15 @@ func (chain *Chain) getAllAcknowledgements(
 		return nil, err
 	}
 	for _, data := range logsData {
-		values := make([]interface{}, 0)
-		if err := abiWriteAcknowledgement.Inputs.Unpack(&values, data); err != nil {
+		packetMap := map[string]interface{}{}
+		if err := parsedHandlerABI.UnpackIntoMap(packetMap, abiWriteAcknowledgement.Name, data); err != nil {
 			return nil, err
-		} else {
+		}
+		for _, v := range packetMap {
+			values, ok := v.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid type: got %T", v)
+			}
 			if len(values) != 4 {
 				return nil, fmt.Errorf("unexpected values: %v", values)
 			}
@@ -254,7 +270,7 @@ func (chain *Chain) findLogsData(ctx context.Context, q ethereum.FilterQuery) ([
 	if !ok {
 		return nil, errors.New("can't convert result to slice")
 	}
-	// need all data?
+
 	data := make([][]byte, len(rs))
 	for i, r := range rs {
 		resmap, ok := r.(map[string]interface{})

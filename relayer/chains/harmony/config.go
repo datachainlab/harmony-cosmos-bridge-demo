@@ -25,6 +25,14 @@ func (c ChainConfig) IBCHandlerAddress() common.Address {
 	return common.HexToAddress(c.IbcHandlerAddress)
 }
 
+func (c ChainConfig) SimpleTokenAddress() common.Address {
+	return common.HexToAddress(c.TokenAddress)
+}
+
+func (c ChainConfig) ICS20BankAddress() common.Address {
+	return common.HexToAddress(c.Ics20BankAddress)
+}
+
 func (c ChainConfig) ChainID() (*sdkcommon.ChainID, error) {
 	return sdkcommon.StringToChainID(c.HarmonyChainId)
 }

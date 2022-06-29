@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/cosmos/cosmos-sdk v0.43.0-beta1
 	github.com/cosmos/ibc-go v1.0.0-beta1
-	github.com/datachainlab/ibc-harmony-client v0.0.0-20220627020344-c0def938d048
+	github.com/datachainlab/ibc-harmony-client v0.0.0-20220628053249-8dbda12b5d0d
 	github.com/gorilla/mux v1.8.0
 	github.com/rakyll/statik v0.1.7
 	github.com/spf13/cast v1.3.1
@@ -18,6 +18,7 @@ require (
 
 replace (
 	github.com/coinbase/rosetta-sdk-go => github.com/coinbase/rosetta-sdk-go v0.5.9
+	github.com/cosmos/ibc-go => github.com/datachainlab/ibc-go v0.0.0-20220628103507-edfd6cd100c3
 	github.com/ethereum/go-ethereum v1.9.25 => github.com/ethereum/go-ethereum v1.9.9
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 )
