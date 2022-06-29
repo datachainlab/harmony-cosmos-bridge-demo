@@ -11,7 +11,7 @@ RLY_BINARY=${SCRIPT_DIR}/../../../../relayer/build/uly
 RLY="${RLY_BINARY} --debug"
 
 # XXX set proper value
-TX_INTERNAL=3
+TX_INTERNAL=5
 CHAINID_ONE=ibc0
 CHAINID_TWO=ibc1
 RLYKEY=testkey
